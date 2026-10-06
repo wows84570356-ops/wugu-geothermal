@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>霧谷數據系統連線</title>
+<style>
+:root{--bg:#EDF0EB;--surface:#FAFBF8;--ink:#1C2420;--muted:#56635B;--line:#C9D1CA;--deep:#244A3D;--sulfur-bg:#F6EBC4;
+  --f-display:"LXGW WenKai TC","Kaiti TC","DFKai-SB",serif;--f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.7}
+.strata{height:10px;background:linear-gradient(to bottom,#6B4A2E 0 20%,#A8743E 20% 40%,#C9A15B 40% 60%,#5A7F6E 60% 80%,#2F5D7A 80%)}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:20px;padding-block:24px 48px}
+h1{font-family:var(--f-display);font-size:34px;margin:0 0 4px}
+h2{font-family:var(--f-display);font-size:24px;margin:0 0 8px}
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;margin:20px 0 32px}
+@media (max-width:640px){.hero{grid-template-columns:minmax(0,1fr)}}
+.hero .qr img{width:280px;height:280px;image-rendering:pixelated;display:block;max-width:100%}
+.url{font-family:ui-monospace,Consolas,monospace;font-size:22px;font-weight:700;word-break:break-all;background:var(--sulfur-bg);padding:4px 10px;border-radius:6px;display:inline-block}
+ol{padding-left:1.3em;margin:10px 0 0}
+.warn{border-left:3px solid #d03b3b;padding:4px 0 4px 12px;margin-top:12px;font-size:14px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.btn{font:inherit;font-weight:700;background:var(--deep);color:var(--surface);border:0;border-radius:8px;padding:8px 16px;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;break-inside:avoid}
+.card img{width:100%;max-width:150px;height:auto;image-rendering:pixelated}
+.card b{display:block;font-size:20px;font-family:ui-monospace,Consolas,monospace}
+.card span{font-size:12.5px;color:var(--muted)}
+.hint{color:var(--muted);font-size:14px}
+@media print{
+  body{background:#fff}.strata,.hero,.bar,.noprint{display:none!important}
+  .wrap{padding:0;max-width:none}.grid{grid-template-columns:repeat(4,1fr);gap:6mm}
+  .card{border:1px dashed #999}
+}
+</style>
+</head>
+<body>
+<div class="strata"></div>
+<div class="wrap">
+  <h1>霧谷數據系統</h1>
+  <p class="hint noprint">上課時把這一頁投影出來，學生用手機相機掃描下面的 QR code 就能進入系統。</p>
+
+  <section class="hero" id="hero">
+    <div class="qr" id="mainqr"></div>
+    <div>
+      <h2>學生手機掃這裡</h2>
+      <div class="url" id="url">讀取中…</div>
+      <ol>
+        <li id="wifi">手機連上和這台電腦<b>同一個 Wi-Fi</b>。</li>
+        <li>用相機掃 QR code，或在瀏覽器輸入上面的網址。</li>
+        <li>點自己抽到的角色，等咕咕抽事件卡。</li>
+      </ol>
+      <p class="warn" id="msg" hidden></p>
+    </div>
+  </section>
+
+  <h2>事件卡 QR code（可列印貼在卡片背面）</h2>
+  <div class="bar noprint">
+    <button class="btn" type="button" onclick="window.print()">列印 16 張卡的 QR code</button>
+    <a class="btn ghost" href="index.html">進入系統</a>
+    <span class="hint">掃描後會直接打開那一張事件卡的數據。</span>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+<script src="qrcode.min.js"></script>
+<script>
+const CARDS=[["A","蒸氣停不下來，山林被燙傷"],["B","溫泉水位突然少了 9.5 公尺"],["C","簽到不等於同意"],["D","受影響的人都到場了嗎？"],
+ ["E","蒸氣、噪音和異味傳到山下"],["F","四千公尺，答案還沒出來"],["G","地下兩千公尺，岩芯出土"],["H","很熱，卻把井管吃壞了"],
+ ["I","地底頻繁微震，民宅牆面龜裂"],["J","硫化氫超標，村民頭暈送醫"],["K","部落要求入股，也要共同決定"],["L","工程道路靠近文化地景"],
+ ["M","碳酸鈣堵塞井管，流量暴跌"],["N","四十年舊井，套管鏽蝕成蜂窩"],["O","附近的間歇泉越來越安靜"],["P","熔岩逼近地熱電廠"]];
+function qrImg(text,cell){const q=qrcode(0,"M");q.addData(text);q.make();return q.createImgTag(cell,cell*2)}
+function draw(base){
+  document.getElementById("url").textContent=base;
+  document.getElementById("mainqr").innerHTML=qrImg(base,7);
+  document.getElementById("grid").innerHTML=CARDS.map(([id,t])=>`<div class="card">${qrImg(base+"#"+id,4)}<b>${id}</b><span>${t}</span></div>`).join("");
+}
+function warn(t){const m=document.getElementById("msg");m.textContent=t;m.hidden=false}
+fetch("lan.json",{cache:"no-store"}).then(r=>r.json()).then(d=>{
+  draw(d.url);
+  if(/^http:\/\/127\./.test(d.url))warn("找不到這台電腦的網路位址。請確認電腦已連上 Wi-Fi，然後重新執行「啟動系統.bat」。");
+}).catch(()=>{
+  const base=location.href.replace(/qr\.html.*$/,"").replace(/#.*$/,"");
+  draw(base);
+  const local=location.protocol==="file:"||/^(localhost|127\.)/.test(location.hostname);
+  if(local)warn("這一頁不是透過「啟動系統.bat」開啟的，手機可能連不進來。請關掉這個分頁，改用「啟動系統.bat」啟動。");
+  else document.getElementById("wifi").innerHTML="手機只要能上網（Wi-Fi 或行動網路）就可以。";
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1158 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>霧谷角色數據手冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 版面概念：野外調查筆記本。左側是「我的身分」，右側是依分頁切換的資料；頂端是一條岩層色帶。 */
+:root{
+  --bg:#EDF0EB; --surface:#FAFBF8; --sunk:#E2E7E1; --ink:#1C2420; --muted:#56635B; --line:#C9D1CA;
+  --deep:#244A3D; --sulfur:#9A7400; --sulfur-bg:#F6EBC4;
+  --r-lubi:#A65A12; --r-xiong:#A23A2E; --r-lili:#17706B; --r-lanlan:#5E4391; --r-zhizhi:#235F9C; --r-gugu:#5F6B1E;
+  --strata1:#6B4A2E; --strata2:#A8743E; --strata3:#C9A15B; --strata4:#5A7F6E; --strata5:#2F5D7A;
+  --f-display:"LXGW WenKai TC","Noto Serif TC","Kaiti TC","DFKai-SB",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121815; --surface:#1A221E; --sunk:#151C18; --ink:#E3EAE5; --muted:#9BA9A1; --line:#2F3B35;
+  --deep:#8CC9B2; --sulfur:#E2B84A; --sulfur-bg:#3A3118;
+  --r-lubi:#E59A55; --r-xiong:#EA7F72; --r-lili:#5CC5BD; --r-lanlan:#B39AE6; --r-zhizhi:#78B2EC; --r-gugu:#B7C46A;
+  --strata1:#7B5A3E; --strata2:#9C6E3E; --strata3:#B08C4E; --strata4:#4E7464; --strata5:#2E5770;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#121815; --surface:#1A221E; --sunk:#151C18; --ink:#E3EAE5; --muted:#9BA9A1; --line:#2F3B35;
+  --deep:#8CC9B2; --sulfur:#E2B84A; --sulfur-bg:#3A3118;
+  --r-lubi:#E59A55; --r-xiong:#EA7F72; --r-lili:#5CC5BD; --r-lanlan:#B39AE6; --r-zhizhi:#78B2EC; --r-gugu:#B7C46A;
+  --strata1:#7B5A3E; --strata2:#9C6E3E; --strata3:#B08C4E; --strata4:#4E7464; --strata5:#2E5770;
+  color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;margin:0}
+.strata{height:10px;background:linear-gradient(to bottom,var(--strata1) 0 20%,var(--strata2) 20% 40%,var(--strata3) 40% 60%,var(--strata4) 60% 80%,var(--strata5) 80% 100%)}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:20px 56px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-block:8px 18px;border-bottom:1px solid var(--line)}
+header.top h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,4vw,36px);line-height:1.2;margin:0;text-wrap:balance}
+header.top p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.case{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);padding:4px 10px;border-radius:4px;white-space:nowrap}
+
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;margin-top:22px}
+@media (max-width:820px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+/* 身分選擇 */
+.picker{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);align-self:start;display:flex;flex-direction:column;gap:6px}
+.picker .lab{font-size:12px;letter-spacing:.12em;color:var(--muted);margin-bottom:2px}
+.rolebtn{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:8px;padding:6px 8px;color:var(--ink);font:inherit;cursor:pointer}
+.rolebtn:hover{background:var(--surface);border-color:var(--line)}
+.rolebtn[aria-pressed="true"]{background:var(--surface);border-color:var(--rc)}
+.rolebtn:focus-visible,.tab:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--sulfur);outline-offset:2px}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:19px;color:var(--surface);background:var(--rc)}
+.rolebtn b{display:block;font-weight:700;line-height:1.3}
+.rolebtn small{display:block;color:var(--muted);font-size:12.5px;line-height:1.3}
+@media (max-width:820px){
+  .picker{position:static;flex-direction:row;flex-wrap:wrap}
+  .picker .lab{flex-basis:100%}
+  .rolebtn{width:auto;grid-template-columns:30px auto;padding:4px 10px 4px 4px;border-color:var(--line);border-radius:999px}
+  .av{width:30px;height:30px;font-size:15px}
+  .rolebtn small{display:none}
+}
+
+/* 分頁 */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.tab{font:inherit;font-weight:500;background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--sulfur)}
+h2{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.3;margin:0 0 6px;text-wrap:balance}
+h3{font-size:16px;font-weight:700;margin:0 0 8px;text-wrap:balance}
+.lede{color:var(--muted);margin:0 0 20px;max-width:68ch}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted)}
+
+/* 角色頁 */
+.rolehead{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;align-items:start;margin-bottom:22px}
+.rolehead .av{width:64px;height:64px;font-size:32px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:28px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.fact .eyebrow{display:block;margin-bottom:2px}
+.fact p{margin:0}
+.section{margin-bottom:30px}
+.mydata{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+.mydata .row{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr);gap:6px 20px;padding:12px 0;border-bottom:1px solid var(--line)}
+@media (max-width:560px){.mydata .row{grid-template-columns:minmax(0,1fr)}}
+.dname{font-weight:700;color:var(--ink);background:none;border:0;padding:0;font:inherit;font-weight:700;text-align:left;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.dname:hover{text-decoration-color:var(--sulfur)}
+.unit{display:block;font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:500}
+.row p{margin:0}
+ul.plain{margin:0;padding-left:1.2em}
+ul.plain li{margin-bottom:4px}
+.misread{display:flex;flex-direction:column;gap:10px}
+.misread div{border-left:3px solid var(--sulfur);padding:2px 0 2px 12px}
+.misread q{font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:2px 10px;cursor:pointer;line-height:1.6}
+.chip.on{background:var(--sulfur-bg);border-color:var(--sulfur)}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:var(--rc,var(--muted))}
+.letter{font-family:var(--f-mono);font-weight:500}
+.secret{background:var(--sulfur-bg);border-radius:8px;padding:12px 14px}
+
+/* 事件卡 */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.evlist{display:flex;flex-direction:column;gap:10px}
+details.ev{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+details.ev[open]{border-color:var(--muted)}
+details.ev summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px}
+details.ev summary::-webkit-details-marker{display:none}
+.core{width:44px;height:44px;border-radius:6px;display:grid;place-items:center;font-family:var(--f-mono);font-size:20px;color:var(--surface);background:linear-gradient(to bottom,var(--strata2),var(--strata1))}
+.evt{font-weight:700;line-height:1.4}
+.src{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
+.spk{font-size:12.5px;white-space:nowrap;color:var(--rc);font-weight:700}
+.mine{font-size:11.5px;letter-spacing:.06em;background:var(--sulfur-bg);color:var(--ink);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:500;white-space:nowrap}
+.evbody{padding:0 14px 16px;display:flex;flex-direction:column;gap:16px;border-top:1px solid var(--line);padding-top:14px}
+.quote{border-left:3px solid var(--rc);padding-left:12px;margin:0}
+.quote b{color:var(--rc)}
+.meaning{background:var(--sunk);border-radius:8px;padding:12px 14px}
+.meaning p{margin:0}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.opt{border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.opt h4{margin:0 0 6px;font-size:14.5px}
+.opt p{margin:0;font-size:14px}
+.foryou{border:1px dashed var(--rc);border-radius:8px;padding:12px 14px}
+.foryou p{margin:0 0 6px}
+.foryou p:last-child{margin:0}
+
+/* 判斷卡 */
+.judge{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:760px){.judge{grid-template-columns:minmax(0,1fr)}}
+form.jf{display:flex;flex-direction:column;gap:12px}
+form.jf label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+form.jf select,form.jf textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+form.jf textarea{min-height:64px;resize:vertical}
+.out{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;align-self:start}
+.out .sentence{font-size:16px;line-height:1.9}
+.out .sentence u{text-decoration:none;background:var(--sulfur-bg);padding:0 3px;border-radius:3px}
+.btn{font:inherit;font-weight:700;background:var(--deep);color:var(--surface);border:0;border-radius:8px;padding:8px 16px;cursor:pointer;align-self:flex-start}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.stones{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.stone{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.stone b{display:block}
+.stone span{font-size:13.5px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:36px;padding-top:12px}
+
+/* 角色台詞 */
+.myline{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--rc);border-radius:8px;padding:14px 16px;margin:12px 0 22px;display:flex;flex-direction:column;gap:8px}
+.myline .say{font-family:var(--f-display);font-size:19px;line-height:1.6;margin:0}
+.myline .ask{margin:0;font-size:14.5px}
+.myline .ask b{color:var(--rc)}
+.alllines{display:flex;flex-direction:column;gap:8px}
+.alllines .ln{border-left:3px solid var(--rc);padding:2px 0 2px 12px;font-size:14.5px}
+.alllines .ln b{color:var(--rc)}
+.alllines .ln.me{background:var(--sulfur-bg);border-radius:0 6px 6px 0;padding-block:6px}
+.alllines .ask{display:block;color:var(--muted);font-size:13px}
+.situ{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--rc);border-radius:8px;padding:14px 16px}
+.situ h3{margin:2px 0 6px}
+.situ p{margin:0;font-size:15.5px;line-height:1.8}
+.sixsitu summary{cursor:pointer}
+/* 抽卡現場 */
+:root{--st-good:#0ca30c;--st-warn:#fab219;--st-bad:#d03b3b;--st-na:var(--muted)}
+.drawbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:18px}
+.letters{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;flex-basis:100%}
+.lt{font-family:var(--f-mono);font-size:18px;font-weight:500;min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;position:relative}
+.lt.on{background:var(--deep);color:var(--surface);border-color:var(--deep)}
+.lt.done::after{content:"";position:absolute;right:5px;top:5px;width:6px;height:6px;border-radius:50%;background:var(--sulfur)}
+.mebar{display:none}
+@media (max-width:820px){
+  .picker.collapsed .rolebtn,.picker.collapsed .lab{display:none}
+  .picker.collapsed .mebar{display:flex}
+  .mebar{flex-basis:100%;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--rc);border-radius:999px;padding:4px 6px 4px 4px}
+  .mebar .av{width:30px;height:30px;font-size:15px}
+  .mebar b{flex:1;min-width:0}
+  .mebar button{font:inherit;font-size:13px;background:none;border:1px solid var(--line);border-radius:999px;padding:2px 12px;color:var(--ink);cursor:pointer}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .tab{white-space:nowrap;padding:8px 10px}
+  header.top p{font-size:14px}
+  .layout{margin-top:14px;gap:16px}
+}
+.drawbar select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;max-width:100%}
+.drawbar .btn{align-self:center}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.drawn{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.drawhead{display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:start;margin-bottom:6px}
+.drawhead .core{width:56px;height:56px;font-size:26px}
+.sample{font-size:12.5px;background:var(--sulfur-bg);border-radius:4px;padding:2px 8px;display:inline-block;margin-bottom:6px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;position:relative;min-width:0}
+.tile.focus{border-color:var(--rc);box-shadow:inset 0 0 0 1px var(--rc)}
+.tile .hd{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.tile .lbl{font-weight:700;font-size:14px}
+.tile .val{font-size:26px;font-weight:700;line-height:1.15}
+.tile .val small{font-size:13px;font-weight:500;color:var(--muted);margin-left:4px}
+.tile .cmp{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tile .rd{font-size:13.5px;margin:0}
+.st{display:inline-flex;gap:5px;align-items:center;font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap}
+.st i{font-style:normal;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:10px;color:#fff;background:var(--sc)}
+.st.warn i{color:#1C2420}
+.yours{font-size:11px;letter-spacing:.06em;color:var(--ink);background:var(--sulfur-bg);border-radius:4px;padding:0 6px}
+.spark{position:relative}
+.spark svg{display:block;width:100%;height:auto;overflow:visible;touch-action:none}
+.spark text{fill:var(--muted);font-size:10px;font-family:var(--f-body)}
+.tip{position:absolute;top:-6px;transform:translate(-50%,-100%);pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:2px 7px;border-radius:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tile details{font-size:12.5px;color:var(--muted)}
+.tile details summary{cursor:pointer}
+.tile table{border-collapse:collapse;margin-top:4px;font-variant-numeric:tabular-nums}
+.tile td,.tile th{padding:1px 10px 1px 0;text-align:left;font-weight:400}
+.gaplist{margin:0;padding-left:1.2em}
+.gaplist li{margin-bottom:4px}
+.unknown{border:1px dashed var(--muted);border-radius:8px;padding:12px 14px}
+@media (prefers-reduced-motion:no-preference){.dcard{transition:box-shadow .3s,border-color .3s}}
+</style>
+</head>
+<body>
+
+<div class="strata" aria-hidden="true"></div>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>霧谷角色數據手冊</h1>
+      <p>抽到事件卡時，在這裡選同一張卡，系統會提供這張卡的現場數據，以及這些數據代表什麼，幫助你做判斷。左邊先選你的角色，系統會標出你這個身分最需要看的數據。</p>
+    </div>
+    <span class="case">案件：霧谷一號・探勘測試</span>
+    <a class="case" href="qr.html" style="text-decoration:none">連線 QR code</a>
+  </header>
+
+  <div class="layout">
+    <nav class="picker" id="picker" aria-label="選擇我的角色"><span class="lab">我的角色</span></nav>
+    <main>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <section id="p-role" role="tabpanel"></section>
+      <section id="p-draw" role="tabpanel" hidden></section>
+      <section id="p-events" role="tabpanel" hidden></section>
+      <section id="p-judge" role="tabpanel" hidden></section>
+      <p class="note">「抽卡現場」的數值、門檻與時間軸都是為霧谷一號虛構的教學數據，不是真實監測結果。參考值僅供課堂判讀練習，實際標準以現行法規與主管機關公告為準。霧谷一號的地點、時程與工作安排都是虛構設定；事件卡取材自新聞與國外案例，詳細內容請掃描卡片上的 QR code。</p>
+    </main>
+  </div>
+</div>
+
+<script>
+const ROLES = {
+  lubi:{name:"鹿比",ch:"鹿",title:"開發商",
+    identity:"「霧谷一號」測試案的提案人。你要讓測試順利進行，也要讓大家相信這個案子值得做。",
+    stance:"進度和成本是你的壓力；但隱瞞資料缺口，只會讓案子之後卡得更久。",
+    duty:"送件與補件，把口頭承諾寫成可以追蹤的條件。",
+    goal:"爭取「附條件繼續」，並主動揭露一項不確定性。",
+    secret:"保留可行時程，同時準備替代方案。",
+    data:{
+      temp:"決定這口井有沒有發電價值。溫度高只是第一關，還要有足夠流量。",
+      flow:"流量決定能發多少電、多久能回本。流量快速下降，要先排除結垢或堵塞（事件 M）。",
+      gradient:"決定要鑽多深、花多少錢。比較不同井位時要比梯度，不是只比溫度（事件 F、G）。",
+      perm:"沒有讓水流動的裂隙，再熱也抽不出來。這是決定「繼續」或「換位置」的關鍵。",
+      corrosion:"選錯材料，井管會提早損壞，成本和安全風險一起上升（事件 H、N）。",
+      baseline:"沒有施工前資料，居民反映問題時，你無法證明「不是測試造成的」。基線也是保護你自己的證據。",
+      disclosure:"每週公布摘要，對你來說是透明，對居民來說可能太慢。即時公開能換到信任。"},
+    questions:["這筆數據支持「繼續」、「調整」還是「換位置」？","補這筆資料要花多少錢、多少時間？","我能承諾的監測門檻是多少？超過時我會怎麼做？"],
+    misread:[["地熱在地底深處，跟溫泉完全是兩碼子事","規劃書只量井口溫度和蒸氣流量，沒有任何水位或水質數據能支持這句話。"],["已通知公所窗口，消息已傳達給每位鄉親","通知不等於說明，說明也不等於同意。"]]},
+  xiong:{name:"熊仔",ch:"熊",title:"主管機關",
+    identity:"審查這個案子能不能往下一步走。你的每個決定都要經得起追問。",
+    stance:"不能因為趕時間就放行，也不能因為怕風險就一律退件。",
+    duty:"核對文件與必要條件，決定核可、附條件核可、退件或暫停；設定評估因子的權重（總和 100%）。",
+    goal:"做決定前，至少向兩個不同角色各問一個問題。",
+    secret:"每個處置都寫出程序依據。",
+    data:{
+      trigger:"這是你最重要的工具。先規定「數值到多少就停」，現場出事時才不必臨時爭論。",
+      pressure:"判斷井是否受控。壓力異常是要求停工的直接依據（事件 A）。",
+      h2s:"涉及人身安全。達到門檻就可以要求關井疏散，不必等原因查清（事件 J）。",
+      quake:"用分級門檻（綠、黃、紅燈）規定何時降壓、何時停止注水（事件 I）。",
+      lava:"天然災害發生時，人員安全優先於設備（事件 P）。",
+      consent:"程序是否完整，是核可前必查的文件。簽到表不能當同意書（事件 C）。",
+      baseline:"沒有基線，就無法判斷之後的變化是否由開發造成。可以把「先建立基線」列為核可條件。"},
+    questions:["這筆數據有沒有超過法定標準？沒有超標，是否仍有實際影響？","哪些必要條件已經符合？哪些還不足？","如果附條件核可，條件能不能量測？由誰查核？何時查核？"],
+    misread:[["沒超標就沒問題","平均值合格，夜間或瞬間的數值仍可能擾民（事件 E）。"],["沒有資料，就是沒有風險","缺資料應該附條件或暫停，不能當成放行的理由。"]]},
+  lili:{name:"栗栗",ch:"栗",title:"當地居民・溫泉業者",
+    identity:"住在井場山下，靠溫泉維生。你最清楚這裡平常是什麼樣子。",
+    stance:"你不必一定支持或反對。你的目標是讓噪音、水和交通的影響，變成可以追蹤的條件。",
+    duty:"說出生活中的影響，指出看不懂或不足的資料，提出有門檻、有期限、超標有處置的監測要求。",
+    goal:"讓一項生活經驗改變最後的條件或追蹤方式。",
+    secret:"把生活影響變成監測門檻。",
+    data:{
+      spring_level:"你生計的直接指標。水位下降時，第一個要問的是「測試前的水位是多少」（事件 B）。",
+      spring_flow:"業者每天都在看的數字。你的日常紀錄本身就是有用的基線資料。",
+      noise:"要求看夜間和逐時的資料，不只看全天平均。低頻聲常被平均值低估。",
+      h2s:"聞到臭蛋味時記下時間和地點；但聞不到不代表安全，要看偵測器的數值。",
+      geyser:"泉況是景觀，也是生活記憶。要有長期紀錄，才看得出逐年減弱的趨勢（事件 O）。",
+      crack:"施工前請業者幫你家拍照存證，之後才分得出新舊裂縫（事件 I）。",
+      traffic:"工程車經過的時段和次數，會影響上下學和觀光客。"},
+    questions:["測試前的數據是多少？跟現在差多少？","超過多少要停？誰通知我？多久之內通知？","如果生活或生意受影響，誰負責？怎麼補償？"],
+    misread:[["白天施工，不打擾大家","白天也有人在家，溫泉也是白天營業。"],["每週上網公布數據","不是每個人都會上網查，出事時也等不了一週。"]]},
+  lanlan:{name:"嵐嵐",ch:"嵐",title:"原住民族代表",
+    identity:"代表部落參與討論。你練習的是制度中的位置，不代表所有部落的立場。",
+    stance:"個人出席或在系統上點選，不等於部落集體同意。重要事項要帶回部落會議決定。",
+    duty:"檢視土地與諮商資料，說清楚「我能代表誰、哪些事要帶回部落」，提出程序條件與實質保障條件。不表演文化，也不公開敏感知識。",
+    goal:"確保最後的紀錄寫明：單一代表不能替整個社群同意。",
+    secret:"讓集體程序不被個人代替。",
+    data:{
+      consent:"要看是否經過部落會議、是否用族人聽得懂的方式說明。簽到表只證明誰到場（事件 C）。",
+      coverage:"把水系、道路、噪音範圍三張圖疊起來，看哪些部落被漏掉（事件 D）。",
+      culture:"只需要標出「需要迴避的範圍」，不必公開精確座標（事件 L）。",
+      benefit:"比較回饋金、股權和決策席次。每月 500 元 × 12 個月 × 30 年 = 每戶 18 萬元，要和土地與風險一起衡量（事件 K）。",
+      water_quality:"溪流是部落取水和漁獵的地方，下游水質變化要列入監測。",
+      traffic:"工程動線有沒有切斷採集、狩獵或祭儀的通路。"},
+    questions:["這個決定需要帶回部落會議嗎？","資料有沒有用族人聽得懂的方式說明？還有誰被漏掉？","保障條件是什麼？程序上的（諮商）和實質上的（影響與分享）各有哪些？"],
+    misread:[["已向鄉公所報備","公所是行政機關，不能代替部落會議。"],["這條路平常很少人在走","少人走不等於沒有用途，可能是季節性的採集或祭儀通路。"]]},
+  zhizhi:{name:"知知",ch:"知",title:"專家學者",
+    identity:"獨立檢視資料，提出評分、理由和不確定性。",
+    stance:"分數不是答案，證據才是。要分清楚「有證據」、「合理推論」和「目前未知」。",
+    duty:"依平台 10 項評估因子給 0–100 分，寫下證據、信心程度與未知。兩位專家意見不同時，比較假設，不投票。",
+    goal:"取得新的在地資訊後，重新檢查至少一項原本的判斷。",
+    secret:"保留不確定性，並提出驗證方法。",
+    data:{
+      gradient:"比較不同深度的井要用梯度。事件 F 約每公里 33°C，事件 G 約每公里 60°C，後者條件好很多。",
+      perm:"「熱、水、通道」缺一不可。岩芯高溫只證明了第一項（事件 G）。",
+      chem:"pH、氯離子、鈣、二氧化矽決定腐蝕和結垢風險，也是判斷地熱水和溫泉水是否同源的線索。",
+      scale:"流量衰減率和汽化深度可以預測多久要清井（事件 M）。",
+      corrosion:"用實測的腐蝕速率選材，不要憑經驗猜（事件 H、N）。",
+      quake:"要看微震是否跟著注水量和壓力變化、震源在哪裡，才能談因果（事件 I）。",
+      reinject:"抽出和灌回是否平衡，會影響水位、壓力，也會影響微震。",
+      baseline:"基線太短或太晚開始，所有「有變化」的判斷都要打折扣。"},
+    questions:["這個結論是有證據、合理推論，還是目前未知？","我的假設是什麼？換一個假設，結論會變嗎？","還缺哪一筆資料？要多久才拿得到？"],
+    misread:[["時間上同時發生，所以有因果關係","同時發生只是線索。要排除降雨、其他抽水井等其他解釋。"],["兩位專家分數不同，取平均就好","應該比較兩人的假設，把兩種意見和適用條件都留下來。"]]},
+  gugu:{name:"咕咕",ch:"咕",title:"主持人・審查者",
+    identity:"掌握時間、抽事件卡，最後統整各方證據，判斷案子能不能進入下一階段。",
+    stance:"你不是要消除分歧，而是讓證據、條件、責任和還沒解決的事都被看見。",
+    duty:"每完成一站推進度；最後的判定要引用至少三類證據（文件、專家、居民或部落）。",
+    goal:"讓最終方案上的每一個條件，都有負責人、期限和觸發值。",
+    secret:"寫清楚責任人、期限和觸發值。",
+    data:{
+      baseline:"先確認大家引用的數據有沒有可比較的起點。",
+      trigger:"每一個「附條件」都要有數值、期限和負責人，否則無法追蹤。",
+      disclosure:"數據要公開、即時、看得懂，才算真的讓大家參與。",
+      coverage:"確認發言的人涵蓋了所有受影響的群體。",
+      consent:"個人點選不能被記成部落同意。"},
+    questions:["根據哪一項證據？","哪個疑慮仍未解決？","誰負責下一步？何時、用什麼標準重新檢查？"],
+    misread:[["沒有共識就是失敗","沒有留下理由、條件和下一步，才是失敗。"],["平台上有紀錄，就代表參與完成了","有回應不等於形成共識，有評分也不等於風險已解決。"]]}
+};
+const ROLE_ORDER=["lubi","xiong","lili","lanlan","zhizhi","gugu"];
+
+const DATA = {
+  temp:{name:"井口溫度",unit:"°C",group:"資源與工程",
+    what:"從井口流出的熱水或蒸氣溫度。",
+    read:"越高代表熱源越好、發電潛力越大；逐漸下降可能是冷水滲入或地下熱儲冷卻。井口溫度通常比井底低。",
+    ref:"傳統地熱發電一般需要地下熱儲約 150°C 以上；溫度較低的熱水可用雙循環機組發電，或直接供熱。"},
+  flow:{name:"蒸氣與熱水流量",unit:"噸／小時（t/h）",group:"資源與工程",
+    what:"一口井每小時能產出多少熱水或蒸氣。",
+    read:"決定能發多少電。突然變大可能是失控（井噴）；持續下降可能是結垢堵塞，或地下壓力下降。",
+    ref:"趨勢比單一數字重要。事件 M 三個月下降八成，就是嚴重警訊。"},
+  pressure:{name:"井口壓力",unit:"bar（巴）",group:"資源與工程",
+    what:"井口的流體壓力。",
+    read:"壓力穩定代表井受控；異常上升可能是井噴前兆，異常下降可能是套管破損或漏失。",
+    ref:"要事先設定停機壓力值，並確認井口防噴設備能承受的上限。"},
+  spring_level:{name:"溫泉水位",unit:"公尺（距地表深度）",group:"水環境",factor:"地下水質",
+    what:"溫泉井或泉源的水面高度。",
+    read:"水位下降代表抽出的比補進的多。要和施工前基線、同期降雨、附近其他抽水井一起比較，才能判斷原因。",
+    ref:"事件 B 一夕下降 9.5 公尺，是很大的變化，需要立即調查。"},
+  spring_flow:{name:"溫泉流量與水溫",unit:"公升／分鐘、°C",group:"水環境",factor:"地下水質",
+    what:"溫泉每分鐘的出水量和出水溫度。",
+    read:"業者生計的直接指標。流量和水溫同時下降，比只有一項下降更值得警覺。",
+    ref:"業者自己的日常紀錄可以當作基線，記得寫上日期和時間。"},
+  water_quality:{name:"溪水與地下水水質",unit:"pH、濁度 NTU、導電度 μS/cm",group:"水環境",factor:"地表水質・地下水質",
+    what:"溪水和井水的酸鹼度、混濁程度，以及溶解鹽類的多寡。",
+    read:"導電度突然上升，可能有地熱水混入；濁度上升可能來自施工擾動或豪雨。要上游、下游一起對照。",
+    ref:"對應平台的「地表水質」和「地下水質」兩項因子。"},
+  chem:{name:"地熱流體化學成分",unit:"pH、氯離子、鈣、二氧化矽、砷、硼",group:"資源與工程",factor:"地下水質",
+    what:"地熱水裡溶解了哪些物質。",
+    read:"pH 低（偏酸）會腐蝕井管；鈣和碳酸根高容易結垢；砷、硼高則排放前要處理。也能比對地熱水和溫泉水的成分，判斷是不是同一個來源。",
+    ref:"pH 每低 1，酸度增加 10 倍。"},
+  h2s:{name:"硫化氫 H₂S",unit:"ppm（百萬分之一）",group:"空氣",factor:"空氣品質調查・自行監測",
+    what:"地熱蒸氣中常見的氣體，有臭蛋味，比空氣重。",
+    read:"無風時會積在山谷低處。濃度低就聞得到臭味；濃度高時嗅覺會麻痺，聞不到反而更危險。要看偵測器讀數和風向。",
+    ref:"約 0.01 ppm 以下就聞得到；我國勞工作業場所 8 小時容許濃度為 10 ppm；約 100 ppm 以上嗅覺麻痺；數百 ppm 可能致命。"},
+  noise:{name:"噪音",unit:"dB(A)；Leq 均能音量、Lmax 最大音量",group:"聲音與地質",factor:"噪音",
+    what:"聲音的大小。Leq 是一段時間的平均能量，Lmax 是最大的瞬間值。",
+    read:"每增加 10 分貝，人耳感覺大約吵一倍。平均合格，不代表瞬間巨響不擾人；dB(A) 加權也會低估低頻聲。夜間標準比日間嚴格。",
+    ref:"要看分時段（日間、晚間、夜間）的逐時資料，並對照所在區域的環境音量標準。"},
+  vibration:{name:"振動",unit:"dB 或 mm/s",group:"聲音與地質",factor:"振動",
+    what:"地面或房屋感受到的震動。",
+    read:"重車、鑽機、爆破都會造成振動；長期振動可能讓老舊房屋的裂縫擴大。",
+    ref:"要和微震分開看：振動多半來自地表施工，微震來自地下。"},
+  quake:{name:"微震",unit:"芮氏規模 ML、次數、震源深度",group:"聲音與地質",factor:"地質",
+    what:"地下的小規模地震，多數人感覺不到。",
+    read:"規模每增加 1，釋放的能量約大 32 倍。要看次數和規模是否跟著注水量、壓力變化，震源是否集中在井附近。",
+    ref:"規模 2 以下通常無感；規模 3 左右，附近多數人會有感。常用「交通號誌」分級：綠燈照常、黃燈降壓、紅燈停止注水。"},
+  crack:{name:"房屋裂縫與地表變形",unit:"裂縫寬度 mm；衛星地表位移",group:"聲音與地質",factor:"地質",
+    what:"牆面裂縫寬度的變化，以及地面抬升或下陷。",
+    read:"必須和施工前的屋況調查比較，才分得出是新裂縫還是舊裂縫。",
+    ref:"施工前的屋況調查（拍照、量裂縫）對居民和開發商都是保護。"},
+  gradient:{name:"井底溫度與地溫梯度",unit:"°C、°C／公里",group:"資源與工程",factor:"地質",
+    what:"地下每深 1 公里，溫度增加多少。",
+    read:"梯度 =（井底溫度 − 地表溫度）÷ 深度。比較不同深度的井，要比梯度，不是只比溫度。",
+    ref:"一般地殼約每公里 25–30°C。事件 F：(150−20)÷4 ≈ 每公里 33°C；事件 G：(140−20)÷2 ≈ 每公里 60°C（地表溫度以 20°C 估算）。"},
+  perm:{name:"滲透率與產能測試",unit:"注水測試、產能測試結果",group:"資源與工程",factor:"地質",
+    what:"岩層裂隙讓水流動的能力。",
+    read:"地熱開發要「熱、水、通道」三項都具備。溫度夠，但滲透率低，就抽不出足夠的熱水。",
+    ref:"要做注水測試或產能測試才知道，只看岩芯不夠。"},
+  scale:{name:"結垢指標",unit:"碳酸鈣飽和指數、流量衰減率 %／月",group:"資源與工程",
+    what:"水中礦物析出、黏在管壁上的傾向。",
+    read:"熱水上升時壓力下降、開始沸騰，二氧化碳逸出，碳酸鈣就會沉積。飽和指數大於 0，代表容易沉積。",
+    ref:"宜蘭清水地熱早期就受結垢問題困擾（事件 M）。"},
+  corrosion:{name:"腐蝕速率與套管完整性",unit:"mm／年；井測壁厚",group:"資源與工程",
+    what:"井管每年被侵蝕掉多少，還剩多厚。",
+    read:"套管是隔開熱水和淺層地下水的牆。腐蝕穿孔後，熱水可能漏進地下水，或沿裂縫竄出地表。",
+    ref:"舊井沒有紀錄，不等於沒有問題（事件 N）。"},
+  reinject:{name:"抽取量與回注率",unit:"噸／小時；回注率 %",group:"資源與工程",factor:"地下水質",
+    what:"抽出多少熱水，又灌回地下多少。",
+    read:"回注太少，地下水位和壓力會下降（事件 O）；回注壓力太高，可能引發微震（事件 I）。",
+    ref:"抽取量、回注量和回注壓力，三項要一起公開。"},
+  geyser:{name:"間歇泉與泉況",unit:"噴發次數／天、噴發高度",group:"周邊環境",factor:"自然景觀",
+    what:"天然泉和間歇泉的活動情況。",
+    read:"逐年減弱可能和周邊抽取有關，需要長期紀錄才看得出來。",
+    ref:"紐西蘭羅托魯瓦曾關閉間歇泉周邊的抽水井，之後泉況逐漸恢復（事件 O）。"},
+  traffic:{name:"交通與工程動線",unit:"車次／天、重車比例、通行時段",group:"周邊環境",factor:"交通",
+    what:"工程車走哪條路、有幾輛、什麼時間經過。",
+    read:"聽到「很少人走」，要追問是誰在走、什麼季節走。可能是上學的路，也可能是採集或祭儀的通路。",
+    ref:"對應平台的「交通」因子。"},
+  culture:{name:"文化地景與傳統領域",unit:"迴避範圍（公尺）、通路中斷天數",group:"周邊環境",factor:"其他",
+    what:"採集地、祭祀地、傳統路徑等和文化相關的地方。",
+    read:"很難用一個分數代表。可以量的是距離、施工期間通路中斷幾天、有沒有避開季節性使用的時段。",
+    ref:"敏感地點只標「需迴避範圍」，不公開精確座標。"},
+  lava:{name:"火山與熔岩監測",unit:"熔岩前緣距離 m、推進速度 m／小時",group:"周邊環境",factor:"其他",
+    what:"熔岩離廠區多遠，多快會到。",
+    read:"距離 ÷ 速度 = 剩下的應變時間。也要知道廠內有哪些易燃或有毒物質。",
+    ref:"2018 年夏威夷基拉韋亞火山噴發，熔岩覆蓋了 Puna 地熱電廠的部分設施（事件 P）。"},
+  coverage:{name:"受影響範圍與參與名單",unit:"戶數、聚落數、涵蓋率 %",group:"程序與權益",
+    what:"誰可能受影響、誰被通知、誰真的到場。",
+    read:"範圍不能只看行政區。把溪流下游、交通路線、噪音傳得到的範圍疊起來，涵蓋到的人都要列入名單。",
+    ref:"涵蓋率 = 已通知的受影響群體 ÷ 全部受影響群體。"},
+  consent:{name:"諮商與同意紀錄",unit:"部落會議決議、出席率、說明方式",group:"程序與權益",
+    what:"部落是否經過合法程序，在理解內容後表示同意或不同意。",
+    read:"簽到表只證明誰到場。要看是否經過部落會議、是否用族語或易懂的方式說明、有沒有足夠時間討論。",
+    ref:"《原住民族基本法》第 21 條：在原住民族土地進行開發等行為，應諮商並取得原住民族或部落同意或參與。"},
+  benefit:{name:"利益分享",unit:"元／戶／月、股權 %、董事席次、年限",group:"程序與權益",
+    what:"開發帶來的好處怎麼分給在地。",
+    read:"回饋金是固定金額；股權能分享利潤，也要分擔風險；董事席次代表決策權。",
+    ref:"事件 K：500 元 × 12 個月 × 30 年 = 每戶 18 萬元。"},
+  disclosure:{name:"資訊公開的頻率與形式",unit:"即時、每日、每週；原始數據或摘要",group:"程序與權益",
+    what:"數據多久公開一次，公開的是什麼。",
+    read:"每週摘要對突發事件反應太慢，摘要也看不出瞬間超標。也要想想不上網的居民怎麼得知。",
+    ref:"比起固定的公開頻率，超標時的通報時限（幾小時內通知誰）更重要。"},
+  baseline:{name:"基線資料",unit:"監測起訖日期、涵蓋季節、測點數",group:"跨因子",
+    what:"開發或施工前，環境「原本的樣子」。",
+    read:"沒有基線，就無法判斷之後的變化是不是開發造成的。基線要在施工前開始，最好涵蓋乾季和雨季。",
+    ref:"連續 3 天的測試期間，不足以建立基線。"},
+  trigger:{name:"觸發門檻（停機條件）",unit:"數值＋持續時間＋處置＋負責人",group:"跨因子",
+    what:"事先約定好「數值到多少，就採取什麼行動」。",
+    read:"好的門檻可以量測、有期限、有人負責。例如：夜間噪音超過約定值持續 10 分鐘，就停止作業，並在 2 小時內通知居民窗口。",
+    ref:"這是把「疑慮」變成「條件」的工具。"}
+};
+const GROUPS=["空氣","聲音與地質","水環境","周邊環境","資源與工程","程序與權益","跨因子"];
+
+const EVENTS=[
+ {id:"A",title:"蒸氣停不下來，山林被燙傷",src:"聯合報系｜2025.06.20",what:"現場突然噴出高溫熱水和泥漿，旁邊整片林木都被燙傷枯萎了！",spk:"xiong",
+  line:"泥漿井噴已涉及重大工安與環境違規！身為主管機關，我要求開發商立刻給出應變方案，否則依法勒令全面停工！",
+  data:["pressure","temp","flow","trigger","disclosure"],
+  meaning:"井噴代表井口壓力超出控制設備能承受的範圍。要看噴發前的井口壓力紀錄有沒有異常上升、事先有沒有設停機壓力值。林木枯萎的範圍和熱水流向，決定會不會影響下游水源和步道。",
+  opts:[["暫停測試，搶修清理現場","要先確認井已受控、壓力回穩，人員才能安全進場。代價是測試延後。"],["立即通報居民與步道遊客","要知道熱水流向和影響範圍，才知道該通知誰。通常是第一時間就該做，可以和 A 同時進行。"],["釐清未知風險，查明超壓成因","需要完整的壓力時間紀錄和井況資料。如果井還沒受控就先查原因，現場人員仍有風險。"]]},
+ {id:"B",title:"溫泉水位突然少了 9.5 公尺",src:"原視新聞｜2022.07.13",what:"金崙溫泉水位一夕下降 9.5 公尺，業者抽不到水，原因仍未查明。",spk:"lili",
+  line:"溫泉是居民的生計和生活用水。水位突然掉這麼多，請先停下來調查，不能叫大家自己承擔風險！",
+  data:["spring_level","spring_flow","water_quality","chem","baseline","reinject"],
+  meaning:"同時發生不等於有因果關係。要判斷兩者是否相關，需要：開發前的水位基線（最好涵蓋乾季和雨季）、測試開始和停止的時間與水位變化的對照、同期降雨和附近其他抽水井的用量。鹿比說「地熱和溫泉是兩碼子事」，但兩者可能共用同一條斷層或含水層，要比對水的化學成分才能下結論。",
+  opts:[["暫停測試，調查地下水位變化","如果停止後水位回升，就是支持兩者相關的證據。代價是測試中斷。"],["加密監測，公開地熱與溫泉數據","要把雙方數據放在同一條時間軸上公開。但沒有基線的話，加密監測只能看未來，解釋不了已經發生的下降。"],["維持低強度測試，同步查其他原因","前提是能證明低強度測試不會造成影響。證明不了，就等於讓業者承擔風險。"]]},
+ {id:"C",title:"簽到不等於同意",src:"公視新聞｜2020.10.14",what:"部落簽到表被當成同意，族人沒聽懂內容，夜間鑽探也持續擾民。",spk:"lanlan",
+  line:"簽到只代表我來過，不代表部落同意。請用大家聽得懂的方式重新說明，讓真正受影響的人表達意見！",
+  data:["consent","coverage","noise"],
+  meaning:"簽到表只能證明「誰到場」，不能證明「聽懂內容」或「同意」。要看的是：說明會有沒有用族人聽得懂的語言和方式、有沒有經過部落會議決議、出席者占受影響戶數的比例。夜間鑽探則要看夜間的逐時噪音數據，而不是全天平均。",
+  opts:[["暫停程序，重新召開說明與諮商","要走合法有效的部落會議程序。時程會延後，但可以避免日後程序被認定無效。"],["先調整夜間施工，再補齊同意程序","能馬上降低生活干擾；但如果施工繼續、同意還沒補齊，程序上的瑕疵仍然存在。"],["盤點未被聽見的人，確認後再決定","需要受影響範圍圖和名單比對。能讓之後的諮商找對人，但不能取代諮商本身。"]]},
+ {id:"D",title:"受影響的人都到場了嗎？",src:"原視新聞｜2018.02.04",what:"水系、道路與噪音可能影響多個部落，現有說明會名單恐怕漏人。",spk:"lanlan",
+  line:"影響不會停在行政界線內。沿溪用水、走同一條路、聽得到噪音的人，都應該有機會參與！",
+  data:["coverage","water_quality","traffic","noise"],
+  meaning:"影響範圍不能只用行政區劃。把三張圖疊在一起：溪流的下游方向（水）、工程車經過的路線（交通）、噪音傳得到的距離。落在任何一張圖裡的聚落，都應該列入名單。",
+  opts:[["通知所有可能受影響的社群","範圍大、成本高，但最不容易漏人。需要先有初步範圍，才知道「所有」是指誰。"],["請居民與部落共同補齊名單","在地知識最能找出行政資料漏掉的人，例如季節性使用者、獵人和採集者。"],["先調查影響範圍，再安排參與","用數據界定範圍最有依據；但調查期間，參與會延後。"]]},
+ {id:"E",title:"蒸氣、噪音和異味傳到山下",src:"東森新聞｜2024.12.18",what:"引汽測試的巨響與異味傳到山下；檢測雖無毒氣，居民生活仍受干擾。",spk:"lili",
+  line:"檢測沒有超標，不代表我們沒有受影響。噪音和異味已經干擾生活，測試時間和做法必須重新談！",
+  data:["noise","h2s","disclosure","trigger","baseline"],
+  meaning:"「沒有超標」和「沒有影響」是兩件事。噪音的平均值（Leq）可能合格，但瞬間最大值（Lmax）和低頻聲最擾人。硫化氫在極低濃度就聞得到；聞到臭味不一定有毒，但持續的異味仍然是生活干擾。要看逐時數據，不是日平均。",
+  opts:[["暫停測試，先處理噪音與異味","能立刻減輕干擾。要說清楚改善到什麼程度才能恢復，否則會變成無限期暫停。"],["限制白天短時測試，公開即時監測","即時公開需要監測站和平台。限時能減少干擾，但測試資料可能不夠。"],["設居民通報管道與自動停測門檻","要事先約定數值（例如幾分貝、幾 ppm、持續幾分鐘就停），以及誰有權喊停。"]]},
+ {id:"F",title:"四千公尺，答案還沒出來",src:"公視／中央社｜2025–2026",what:"井深約四千公尺、井底攝氏 150 度，仍未達開發條件，附近可能更熱。",spk:"lubi",
+  line:"這口井沒有達到預期，不代表整個地區都沒有機會。我們應該先把資料補齊，再決定留在原地還是換位置。",
+  data:["gradient","perm","temp","flow"],
+  meaning:"換算地溫梯度：地表以 20°C 估算，(150−20)÷4 ≈ 每公里 33°C，接近一般地殼（每公里 25–30°C），不算特別熱。而且「熱」只是條件之一，還需要有水，以及讓水流動的裂隙。深井成本很高，關鍵是現有數據能不能預測「換位置會更好」。",
+  opts:[["保留此井作監測，暫不鑽新井","舊井可以長期量溫度和水位，成本低；但開發進度會停住。"],["比較周邊資料，評估更換鑽探位置","需要地球物理探勘和地質資料，否則換位置也是賭運氣。新井位也要重新確認影響範圍和諮商對象。"],["補足溫度、流量與地質資料再決定","最穩健，但最花時間和經費。要先說清楚「補到什麼程度」才算夠。"]]},
+ {id:"G",title:"地下兩千公尺，岩芯出土",src:"民視新聞｜2024.12.17",what:"岩芯顯示地下兩千公尺超過攝氏 140 度，但高溫不足以證明能開發。",spk:"zhizhi",
+  line:"岩芯很熱只是第一個線索。我們還要知道流量、水質和裂隙是否穩定，才能判斷這裡適不適合繼續探勘。",
+  data:["gradient","perm","chem","temp"],
+  meaning:"兩千公尺就超過 140°C，換算約每公里 60°C，比事件 F 的井高很多，代表熱源條件好。但岩芯只證明「熱」，還不知道水夠不夠、裂隙通不通、水會不會腐蝕或結垢。把 F 和 G 放在一起看：深度不同時，要比梯度，不是只比溫度。",
+  opts:[["長期監測溫度與流量變化","長期數據能看出是否穩定，但需要時間。"],["分析地熱水成分與腐蝕風險","先了解流體化學，可以預防事件 H、M 那類的設備問題。"],["公開證據與未知，共同選調查項目","讓不是專家的人也能看懂「已知、推論、未知」。選調查項目時，也要考慮成本。"]]},
+ {id:"H",title:"很熱，卻把井管吃壞了",src:"非凡新聞｜2024.04.15",what:"強酸性地熱水迅速腐蝕井管，造成設備損壞，探勘被迫停止。",spk:"zhizhi",
+  line:"溫度夠高也沒有用，如果井管撐不住，風險和成本都會失控。必須先證明材料能耐腐蝕，才能談重啟。",
+  data:["chem","corrosion"],
+  meaning:"pH 每低 1，酸度增加 10 倍。高溫、強酸、含氯的流體會讓一般鋼材腐蝕得很快。要看流體 pH、氯離子濃度、溫度，以及實測的腐蝕速率（每年損失幾毫米）。腐蝕不只是成本問題：套管破了，熱水可能漏進淺層地下水（參考事件 N）。",
+  opts:[["先做小規模耐腐蝕材料試驗","用實測數據選材，成本比整口井失敗低。試驗需要時間。"],["比較水質與井管資料，重新選材","需要完整的流體化學資料。耐蝕材料通常比較貴。"],["暫停重啟，列出必須解決的問題","把「什麼條件下才能重啟」寫清楚，避免無限期暫停。"]]},
+ {id:"I",title:"地底頻繁微震，民宅牆面龜裂",src:"韓國政府｜2019.03.20",what:"回灌後連續發生微震，附近民宅牆面龜裂，居民不敢回家。",spk:"lili",
+  line:"我們住這裡幾十年，從沒遇過這樣的地鳴和裂縫。請先確認房屋是否安全，也要說清楚回灌是不是原因！",
+  data:["quake","crack","reinject","trigger","baseline"],
+  meaning:"背景：韓國浦項 2017 年發生規模 5.5 地震，韓國政府調查團在 2019 年認定與鄰近地熱電廠的注水有關。判斷關聯要看：注水量和壓力的時間紀錄、微震的次數、規模和深度是否跟著注水變化、震源是否集中在井附近。牆面裂縫要和施工前的屋況照片比較，才知道是不是新裂縫。",
+  opts:[["立即停水降壓，先確定民宅安全","停止注水後，如果微震減少，也是判斷關聯的證據。代價是測試中斷。"],["公開微震數據，設立即時監測","要事先訂好分級門檻（綠、黃、紅燈），數據公開才有意義。"],["設修繕專戶，先協助受損住戶","能先照顧居民。但如果沒有施工前屋況資料，之後很難界定哪些損害該由誰負責。"]]},
+ {id:"J",title:"硫化氫超標，村民頭暈送醫",src:"印尼能源部｜2021.02.03",what:"硫化氫在無風山谷蓄積，下風處多人頭暈、嘔吐並送醫。",spk:"xiong",
+  line:"硫化氫不是單純臭味，而是可能致命的毒性氣體。主管機關要求立刻關井、疏散，並提出防護措施！",
+  data:["h2s","trigger","coverage"],
+  meaning:"硫化氫比空氣重，無風時會積在山谷低處。濃度低時有臭蛋味，但高到約 100 ppm 以上會讓嗅覺麻痺，聞不到反而更危險。所以不能用「有沒有臭味」判斷安全，要看偵測器讀數、風速風向，以及下風處住了哪些人。",
+  opts:[["關井疏散，優先保護下風處居民","涉及生命安全時，這通常是第一步，不必等原因查清。要事先知道下風處有哪些人、怎麼通知。"],["加裝除硫設備，確認安全後復測","處理根本原因。要說清楚「確認安全」用什麼數值判斷、由誰量。"],["設風向與濃度門檻，自動停測","需要連續監測儀器和風向資料。門檻要比危險濃度低得多，才來得及反應。"]]},
+ {id:"K",title:"部落要求入股，也要共同決定",src:"紐西蘭商業部｜地熱案例",what:"每戶五百元補貼遭部落退回，族人要求以土地入股並共享利潤。",spk:"lanlan",
+  line:"每月五百元不能買斷部落三十年的土地與風險。我們要實質股權、董事席次，也要共同監督與分配！",
+  data:["benefit","consent"],
+  meaning:"算一下：500 元 × 12 個月 × 30 年 = 每戶 18 萬元。回饋金是固定金額；股權能分享利潤，也要分擔虧損風險；董事席次代表決策權。紐西蘭有毛利族信託持有地熱電廠股份的例子。",
+  opts:[["成立合資公司，保留部落股權","部落有決策權和長期收益，但也承擔經營風險。需要清楚的股權比例和席次。"],["提高現金與公共建設回饋","簡單、沒有經營風險；但部落沒有決策權，金額也可能被認為不夠。"],["邀法律專家，釐清入股可行性","先確認法律和程序上可不可行，再談條件。這段期間要讓部落參與討論。"]]},
+ {id:"L",title:"工程道路靠近文化地景",src:"夏威夷州能源辦｜2022",what:"施工道路靠近採集與祭祀地，族人擔心文化地景及通路受損。",spk:"lanlan",
+  line:"這不只是一條施工道路，也是族人採集、祭祀和傳承記憶的地方。請先和族人一起走查，再決定工程怎麼走。",
+  data:["culture","traffic","consent"],
+  meaning:"文化地景很難用一個數字表示。可以量的是：道路和採集點、祭祀地的距離；施工期間通路會不會中斷、中斷幾天；有沒有避開季節性使用的時段，例如採集季。地點本身可能是敏感知識，資料只要標示「需迴避範圍」，不必公開精確座標。",
+  opts:[["停工走查，重新規劃工程動線","由族人帶路最能找出需要迴避的地方。代價是工期延後。"],["保留通行並設部落共同監督","工程可以繼續，部落也能隨時發現問題。要寫清楚監督權限和發現問題時怎麼處理。"],["請文化與生態專家共同審查","專業審查有依據，但專家不能取代部落自己的判斷。"]]},
+ {id:"M",title:"碳酸鈣堵塞井管，流量暴跌",src:"科技大觀園｜清水地熱",what:"碳酸鈣結晶堵塞井管，三個月內出水量暴跌八成。",spk:"zhizhi",
+  line:"結垢會持續堵塞井管，半年內可能讓這口井完全失效。我們必須立刻調整水化學與清井方案！",
+  data:["scale","flow","chem"],
+  meaning:"熱水上升時壓力下降，在井管裡開始沸騰，二氧化碳逸出，碳酸鈣就析出黏在管壁上。三個月掉八成，等於只剩兩成，衰減非常快。要看流量衰減曲線、開始沸騰的深度，以及水中鈣和碳酸氫根的濃度。",
+  opts:[["酸洗清井，處理廢液與腐蝕風險","能快速恢復流量，但酸洗廢液要妥善處理，酸也可能傷到井管。只能治標。"],["加裝地下阻垢系統，持續控制結晶","長期控制結垢，需要持續的設備和維護費用。"],["降低流量，避免井管內過早汽化","減少結垢，但發電量也跟著下降。"]]},
+ {id:"N",title:"四十年舊井，套管鏽蝕成蜂窩",src:"Geothermics｜2008",what:"四十年舊套管鏽蝕穿孔，高壓熱水可能沿裂縫竄出地表。",spk:"zhizhi",
+  line:"舊套管的機械完整性已經崩潰。再強行加壓，熱水可能沿淺層裂縫竄出地表，造成更大的災害！",
+  data:["corrosion","pressure","water_quality"],
+  meaning:"套管是隔開熱水和淺層地下水的牆。要看井測資料（井徑、壁厚）、井口壓力的變化，以及附近淺層地下水的溫度和水質有沒有異常。舊井的歷史資料常常不完整，「沒有紀錄」不等於「沒有問題」。",
+  opts:[["內襯新套管並灌漿重封","保留舊井、成本較低，但要先確認井況還能修。"],["永久封井，另址申請新井","最徹底，但新井位要重新做影響評估和諮商。"],["限制低壓使用，只作監測井","風險最低的再利用方式；但要定期檢查，確認它不會繼續惡化。"]]},
+ {id:"O",title:"附近的間歇泉越來越安靜",src:"豐盛灣區域議會｜Rotorua",what:"多口井長期抽取熱水後，附近間歇泉逐年減弱。",spk:"lili",
+  line:"間歇泉不只是景點，也是居民生活和地方記憶的一部分。抽取量如果影響泉況，就應該重新談用量和回灌！",
+  data:["geyser","reinject","spring_level"],
+  meaning:"背景：紐西蘭羅托魯瓦在 1980 年代因為大量抽取地熱水，間歇泉活動衰退；政府後來關閉間歇泉周邊一定範圍內的井，泉況逐漸恢復。要看噴發頻率、地下水位或壓力，以及總抽取量三者的長期關係。",
+  opts:[["關閉最靠近間歇泉的井","有國外前例支持。要先確認哪幾口井影響最大，也要處理井主的損失。"],["限制抽取量並增加回灌","兼顧使用和保育。要訂出抽取上限和回注率，並且能查核。"],["共同監測泉況，再依結果調整","最有數據依據，但泉況可能在監測期間繼續變差。要先訂好「惡化到什麼程度就採取 A 或 B」。"]]},
+ {id:"P",title:"熔岩逼近地熱電廠",src:"美國能源署｜2018.07.17",what:"熔岩逼近地熱電廠，廠區停機，井口與輸電設備受到威脅。",spk:"xiong",
+  line:"人員安全必須放在第一位。先撤離、封好井口並隔離危險區，再安排備援供電和後續監測！",
+  data:["lava","trigger","h2s"],
+  meaning:"這類事件要用「小時」計算。要看熔岩前緣的距離和推進速度，推算還剩多少時間；也要知道廠內有哪些易燃或有毒物質，以及井口能不能在被覆蓋前封好。背景：2018 年夏威夷基拉韋亞火山噴發，熔岩覆蓋了 Puna 地熱電廠的部分設施。",
+  opts:[["撤離人員並封閉井口","以人命和防止井口失控為優先。需要知道還剩多少時間能完成封井。"],["移走危險物資，保護關鍵設備","避免火災或毒氣外洩。要確認作業時間夠，不能讓人員冒險。"],["啟動備援電力並持續監測熔岩","維持監測和必要供電，但不能取代撤離。"]]}
+];
+
+/* 抽卡現場：霧谷一號的虛構教學數據。s=時間序列、v=單一數值、base=施工前基線、lim=門檻、st=狀態(ok/warn/bad/na) */
+const SIM={
+ A:{scene:"測試第 3 天上午 10 點，井口突然噴出熱水和泥漿。",t:["D1 09時","D1 12時","D1 15時","D2 09時","D2 12時","D2 15時","D3 09時","D3 10時"],
+  m:[{d:"pressure",label:"井口壓力",unit:"bar",s:[8.1,8.3,8.2,8.6,9.4,10.8,12.9,15.6],lim:12,st:"bad",rd:"第 2 天中午開始爬升，現在 15.6 bar，已經超過停機值 12 bar，而且還在上升：井目前沒有受控。"},
+     {d:"temp",label:"井口溫度",unit:"°C",s:[162,163,163,165,168,171,176,182],st:"warn",rd:"溫度跟著壓力一起升高，噴出的熱水足以燙傷植物和人。"},
+     {d:"coverage",label:"燙傷林木範圍",unit:"",v:"約 3,200 m²",st:"bad",rd:"範圍邊緣距離最近的步道約 350 公尺。"},
+     {d:"disclosure",label:"居民收到通知",unit:"",v:"尚未通知",st:"bad",rd:"每週公布一次摘要的規劃，沒有涵蓋緊急通報。"}],
+  gaps:["熱水往哪個方向流？有沒有流進溪裡？","井口防噴設備最多能承受多少壓力？","今天步道上有多少遊客？"],
+  say:["壓力 15.6 bar 還在上升，現在進場搶修，人員有危險；要先等壓力降回 12 bar 以下。","燙傷範圍離步道約 350 公尺，熱水流向不明，通報範圍要抓寬一點。","壓力從第 2 天中午開始爬升，紀錄完整，事後查得出原因；但查原因不會讓井立刻受控。"]},
+ B:{scene:"測試第 3 天，溫泉業者發現抽不到水。",t:["測試前30天","前20天","前10天","D1","D2","D3","停測後1天","停測後3天"],
+  m:[{d:"spring_level",label:"溫泉水位（距地表）",unit:"m",s:[12.1,12.3,12.2,12.6,15.8,21.7,21.4,20.9],base:12.2,lim:15,st:"bad",rd:"數字越大代表水面越深。測試第 3 天比基線深了 9.5 公尺，超過業者抽水泵的極限 15 公尺。"},
+     {d:"spring_flow",label:"溫泉出水量",unit:"L/分",s:[86,85,87,83,61,22,24,27],base:86,lim:60,st:"bad",rd:"從每分鐘 86 公升掉到 22 公升，停測後只回升一點點。"},
+     {d:"baseline",label:"同期降雨",unit:"mm",s:[35,28,31,0,0,0,0,8],st:"warn",rd:"測試期間剛好連續沒下雨。乾旱也可能讓水位下降，這是另一種解釋。"},
+     {d:"chem",label:"溫泉與地熱水成分比對",unit:"",v:"尚未採樣",st:"na",rd:"沒有化學比對，就無法判斷兩者是不是同一個水源。"}],
+  gaps:["地熱井和溫泉是否來自同一個含水層？","附近其他抽水井這幾天抽了多少水？","基線只有 30 天，沒有涵蓋雨季。"],
+  say:["停測後 3 天，水位從 21.7 回到 20.9 公尺，有一點回升，但離基線 12.2 公尺還很遠；繼續停測觀察，有助於判斷關聯。","已有 30 天基線可以對照，公開後大家能看同一條時間軸；但還缺水化學資料，無法證明同源。","測試期間沒下雨，乾旱可能是原因之一；但下降 9.5 公尺，遠大於測試前 30 天約 0.2 公尺的波動，低強度測試仍有風險。"]},
+ C:{scene:"說明會結束一週後，族人發現簽到表被當成同意書。",t:["20時","21時","22時","23時","0時","1時","2時","3時"],
+  m:[{d:"coverage",label:"說明會到場",unit:"",v:"38／126 戶（30%）",st:"bad",rd:"受影響的 126 戶中，只有 38 戶到場。"},
+     {d:"consent",label:"部落會議決議",unit:"",v:"沒有",st:"bad",rd:"只有簽到表，沒有經過部落會議。"},
+     {d:"consent",label:"說明方式",unit:"",v:"華語簡報 1 場",st:"warn",rd:"沒有族語翻譯，也沒有留時間讓族人回部落討論。"},
+     {d:"noise",label:"夜間鑽探噪音",unit:"dB(A)",s:[52,51,50,49,48,49,48,47],lim:50,st:"warn",rd:"晚上 8 點到 10 點高於約定夜間值 50 dB(A)，之後才降下來。"}],
+  gaps:["族人聽不懂的是哪些部分？","到場的 38 人代表哪些家族或聚落？"],
+  say:["126 戶只有 38 戶到場，也沒有部落會議決議，現有程序不能當作同意。","晚上 8 到 10 點噪音 50–52 dB(A)，高於約定值；先停夜間施工能立刻改善生活干擾。","到場率 30%，還有 88 戶沒被聽見；先盤點，能讓重開的說明會找對人。"]},
+ D:{scene:"說明會前，有人問：名單上的人夠嗎？",t:[],
+  m:[{d:"coverage",label:"說明會名單上的聚落",unit:"",v:"2 個",st:"warn",rd:"名單依行政區劃定。"},
+     {d:"water_quality",label:"溪流下游 5 公里內的聚落",unit:"",v:"4 個",st:"warn",rd:"用水會受影響的範圍，目前是估計值。"},
+     {d:"traffic",label:"工程車會經過的聚落",unit:"",v:"3 個",st:"warn",rd:"每天約 24 車次。"},
+     {d:"noise",label:"噪音傳得到的聚落",unit:"",v:"2 個",st:"ok",rd:"以 55 dB(A) 傳播範圍估算。"},
+     {d:"coverage",label:"三張圖疊起來的聚落",unit:"",v:"5 個（涵蓋率 40%）",st:"bad",rd:"名單只涵蓋其中 2 個，漏掉 3 個。"}],
+  gaps:["季節性使用者（獵人、採集者）不住在聚落裡，戶籍資料找不到他們。","溪流影響範圍是估計值，還沒有實測。"],
+  say:["疊圖後共 5 個聚落，名單只有 2 個，至少要再通知 3 個。","戶籍資料找不到季節性使用者，需要在地人幫忙補名單。","溪流影響範圍還是估計值；先調查能讓範圍更準，但參與會延後。"]},
+ E:{scene:"測試第 2 天，山下居民一直打電話抱怨。",t:["9時","10時","11時","12時","13時","14時","15時","16時"],
+  m:[{d:"noise",label:"噪音平均值 Leq",unit:"dB(A)",s:[54,56,55,53,57,56,55,54],lim:60,st:"ok",rd:"整天都低於日間約定值 60，平均來看是合格的。"},
+     {d:"noise",label:"噪音最大值 Lmax",unit:"dB(A)",s:[68,79,92,70,88,91,74,69],lim:80,st:"bad",rd:"11、13、14 點引汽時，瞬間巨響超過 80，最高 92。"},
+     {d:"h2s",label:"山下測站硫化氫",unit:"ppm",s:[0.01,0.03,0.06,0.02,0.08,0.05,0.03,0.02],base:0.003,st:"warn",rd:"遠低於 10 ppm 的安全標準，但整天都高於嗅覺閾值，所以一直聞得到臭味。"},
+     {d:"disclosure",label:"居民來電通報",unit:"",v:"17 通",st:"warn",rd:"集中在引汽時段。"}],
+  gaps:["沒有量低頻聲；dB(A) 加權會低估低頻。","山下只有 1 個測站。"],
+  say:["Lmax 三度超過 80，硫化氫整天都聞得到；暫停能立刻停止干擾。","Leq 一直低於 60；如果縮短時間、避開引汽高峰，可能可行。即時公開也能讓居民看到 Lmax。","超標都發生在引汽時段，可以設「Lmax 超過 80 持續 1 分鐘就停」這類門檻。"]},
+ F:{scene:"四千公尺的井鑽完了，結果不如預期。",t:["0.5 km","1 km","1.5 km","2 km","2.5 km","3 km","3.5 km","4 km"],
+  m:[{d:"gradient",label:"本井溫度剖面",unit:"°C",s:[36,52,68,84,101,117,134,150],st:"warn",rd:"每公里約增加 33°C，接近一般地殼，不算特別熱。"},
+     {d:"flow",label:"產能測試流量",unit:"t/h",v:"8 t/h",st:"bad",rd:"開發目標是 40 t/h，只達到兩成。"},
+     {d:"gradient",label:"3 公里外舊淺井",unit:"",v:"深 1 km 處 70°C",st:"ok",rd:"換算每公里約 50°C，比本井高，是「附近可能更熱」的線索；但只有一個點。"},
+     {d:"perm",label:"滲透率",unit:"",v:"未測",st:"na",rd:"流量低，可能是因為裂隙少，需要注水測試確認。"}],
+  gaps:["周邊沒有地球物理探勘資料。","本井為什麼流量低？是缺水還是缺裂隙？"],
+  say:["舊井改當監測井成本低，可以持續累積溫度資料；但開發會停住。","舊淺井換算每公里約 50°C，支持「附近可能更熱」；但只有一個點，換位置仍有風險。","流量 8 t/h，遠低於目標 40 t/h；真正缺的是滲透率資料，不只是溫度。"]},
+ G:{scene:"岩芯從地下兩千公尺取出。",t:["250 m","500 m","750 m","1000 m","1250 m","1500 m","1750 m","2000 m"],
+  m:[{d:"gradient",label:"溫度剖面",unit:"°C",s:[35,50,65,80,95,110,126,142],st:"ok",rd:"每公里約增加 60°C，熱源條件很好。"},
+     {d:"perm",label:"岩芯裂隙",unit:"",v:"1,600–1,800 m 段較多",st:"warn",rd:"其他深度的岩層緻密，水可能流不動。"},
+     {d:"chem",label:"流體 pH 與氯離子",unit:"",v:"尚未採樣",st:"na",rd:"不知道會不會腐蝕或結垢。"},
+     {d:"flow",label:"流量",unit:"",v:"尚未測試",st:"na",rd:"還不知道水夠不夠。"}],
+  gaps:["流量、水質、滲透率都還是空白。","溫度是單次量測，還不知道是否穩定。"],
+  say:["溫度剖面穩定上升，長期監測能確認是否穩定；但流量和水質仍是空白。","pH 和氯離子都還沒量；先做，可以避免事件 H、M 那類問題。","已知：溫度、梯度。未知：流量、水質、滲透率。公開後，大家才知道還缺什麼。"]},
+ H:{scene:"測試兩個月後，井管檢查結果出爐。",t:["第1週","第2週","第3週","第4週","第5週","第6週","第7週","第8週"],
+  m:[{d:"corrosion",label:"碳鋼腐蝕速率",unit:"mm/年",s:[0.8,1.2,1.9,2.4,2.6,3.1,3.3,3.6],lim:1,st:"bad",rd:"現在每年損失 3.6 毫米，是設計容許值 1.0 的 3 倍以上。"},
+     {d:"chem",label:"流體 pH",unit:"",v:"2.8",st:"bad",rd:"強酸性。pH 每低 1，酸度增加 10 倍。"},
+     {d:"chem",label:"氯離子",unit:"",v:"4,200 mg/L",st:"warn",rd:"高氯會讓腐蝕更快。"},
+     {d:"corrosion",label:"套管剩餘壁厚",unit:"",v:"6.1 mm（原本 11 mm）",st:"bad",rd:"已經損失將近一半。"}],
+  gaps:["耐蝕合金在這種流體裡的實際腐蝕速率是多少？"],
+  say:["碳鋼每年腐蝕 3.6 毫米，是設計值的 3 倍以上；小規模試驗能先知道哪種材料撐得住。","pH 2.8、氯離子 4,200 mg/L 的資料已經有了，可以直接拿來比對材料規格。","壁厚只剩 6.1 毫米，繼續使用有破管風險；暫停時要寫清楚重啟的條件。"]},
+ I:{scene:"開始回灌後第 3 天，居民回報牆壁裂開。",t:["回灌前3天","前2天","前1天","回灌D1","回灌D2","回灌D3","停注後1天","停注後2天"],
+  m:[{d:"reinject",label:"回灌壓力",unit:"bar",s:[0,0,0,45,62,78,0,0],st:"warn",rd:"回灌壓力一天比一天高。"},
+     {d:"quake",label:"每天微震次數",unit:"次",s:[1,0,2,14,37,63,21,8],base:1,st:"bad",rd:"回灌後從每天約 1 次增加到 63 次，停注後開始下降。"},
+     {d:"quake",label:"當天最大規模",unit:"ML",s:[0.4,0,0.6,1.2,1.9,2.6,2.1,1],lim:2,st:"bad",rd:"第 3 天規模 2.6，超過黃燈門檻 2.0。"},
+     {d:"crack",label:"通報裂縫的住戶",unit:"",v:"7 戶（2 戶有施工前照片）",st:"warn",rd:"另外 5 戶沒有施工前屋況紀錄。"}],
+  gaps:["震源深度和位置是否集中在井附近？","5 戶沒有施工前屋況紀錄。"],
+  say:["停注後微震從 63 次降到 8 次，和回灌時間高度同步；停水降壓有數據支持。","最大規模 2.6 已超過黃燈 2.0；公開即時數據前，要先訂好紅燈值。","7 戶通報裂縫，只有 2 戶有施工前照片，其他 5 戶的責任很難界定。"]},
+ J:{scene:"清晨無風，山谷下方的村民開始頭暈。",t:["6時","7時","8時","9時","10時","11時","12時","13時"],
+  m:[{d:"h2s",label:"下風處硫化氫",unit:"ppm",s:[0.4,1.2,3.8,7.5,12.6,18.4,9.1,3.2],lim:10,st:"bad",rd:"10 點和 11 點超過 10 ppm，最高 18.4。"},
+     {d:"trigger",label:"風速",unit:"m/s",s:[0.3,0.2,0.2,0.4,0.3,0.5,2.1,3.4],st:"warn",rd:"上午幾乎無風，氣體積在山谷；12 點起風後濃度下降。"},
+     {d:"coverage",label:"下風處人口",unit:"",v:"2 個聚落，約 140 人",st:"warn",rd:"其中 6 人已送醫。"},
+     {d:"h2s",label:"除硫設備",unit:"",v:"未安裝",st:"na",rd:"沒有數據可以證明加裝後的效果。"}],
+  gaps:["只有 1 個偵測站，不知道其他低窪處的濃度。","除硫設備的實際效率還不知道。"],
+  say:["10–11 點超過 10 ppm，下風處有約 140 人；先保護人，不必等原因查清。","12 點起風後濃度就降了，但這是天氣幫忙，不是設備；除硫效果還沒有數據。","數據顯示風速低於 0.5 m/s 時濃度持續上升，可以拿來設門檻，例如「風速低於 0.5 m/s 且超過 5 ppm 就停」。"]},
+ K:{scene:"部落退回回饋金，要求重新談分享方式。",t:[],
+  m:[{d:"benefit",label:"開發商提出的回饋金",unit:"",v:"每戶每月 500 元",st:"warn",rd:"30 年合計每戶 18 萬元。"},
+     {d:"benefit",label:"全部落 30 年回饋總額",unit:"",v:"3,780 萬元",st:"warn",rd:"210 戶 × 18 萬元；每年固定 126 萬元。"},
+     {d:"benefit",label:"若部落持股 10%",unit:"",v:"30 年約 3.6 億元",st:"warn",rd:"以開發商預估年淨利 1.2 億元計算；但這是預估值，也可能虧損。"},
+     {d:"consent",label:"部落董事席次",unit:"",v:"0／7 席",st:"bad",rd:"目前方案中，部落沒有決策權。"}],
+  gaps:["淨利預估是開發商自己的數字，沒有經過第三方審查。","土地權屬與能否作價入股，法律上還不確定。"],
+  say:["10% 股權 30 年預估約 3.6 億元，約是回饋金總額的 9.5 倍；但淨利是預估值，可能虧損。","回饋金每年固定 126 萬元，沒有虧損風險；但部落沒有決策權。","土地能不能作價入股還不確定；先釐清法律，但這段期間要讓部落參與討論。"]},
+ L:{scene:"工程道路開挖前，族人來到現場。",t:[],
+  m:[{d:"culture",label:"道路與採集區最近距離",unit:"",v:"40 m",st:"bad",rd:"部落要求至少迴避 100 公尺。"},
+     {d:"culture",label:"道路與祭祀地距離",unit:"",v:"220 m",st:"ok",rd:"在迴避範圍外。"},
+     {d:"culture",label:"施工期間通路中斷",unit:"",v:"18 天（6 天落在採集季）",st:"warn",rd:"可以調整施工時段避開。"},
+     {d:"traffic",label:"每天工程車",unit:"",v:"24 車次",st:"warn",rd:"重車會揚塵、震動。"}],
+  gaps:["敏感地點只有部落知道，平台上不公開座標。","替代路線的長度和成本還沒估算。"],
+  say:["採集區離道路只有 40 公尺，比部落要求的 100 公尺近很多；一起走查可以找替代路線。","中斷 18 天中有 6 天在採集季；共同監督可以協調施工時段。","專家能評估生態影響，但「需迴避範圍」要由部落界定。"]},
+ M:{scene:"井開始生產三個月後，出水量直線下降。",t:["第0月","0.5月","1月","1.5月","2月","2.5月","3月"],
+  m:[{d:"flow",label:"出水量",unit:"t/h",s:[50,44,35,27,19,14,10],base:50,lim:25,st:"bad",rd:"三個月從 50 掉到 10，只剩兩成，低於維持運轉的下限 25。"},
+     {d:"scale",label:"碳酸鈣飽和指數",unit:"",v:"+1.4",st:"bad",rd:"大於 0 就容易沉積，+1.4 代表結垢傾向很強。"},
+     {d:"scale",label:"井管內開始沸騰的深度",unit:"",v:"420 m",st:"warn",rd:"在井管裡就開始沸騰，碳酸鈣會沉積在這個深度附近。"}],
+  gaps:["酸洗之後，多久會再堵住？"],
+  say:["酸洗可以恢復流量；但三個月就掉八成，表示洗完很快又會堵。","飽和指數 +1.4 一直偏高，需要長期控制。","沸騰點在 420 公尺；降低流量能提高井內壓力，把沸騰點往下推。代價是流量更低。"]},
+ N:{scene:"檢查一口四十年的舊井。",t:["100 m","200 m","300 m","400 m","500 m","600 m","700 m","800 m"],
+  m:[{d:"corrosion",label:"各深度套管壁厚",unit:"mm",s:[7.8,6.9,3.1,1.2,4.5,6.8,7.2,7.5],lim:4,st:"bad",rd:"300–400 公尺段低於最小安全厚度 4 毫米，400 公尺處只剩 1.2。"},
+     {d:"water_quality",label:"附近淺層地下水溫",unit:"°C",t:["1月","2月","3月","4月","5月","6月","7月","8月"],s:[22,22,23,23,25,28,31,33],base:22,st:"bad",rd:"半年內從 22°C 升到 33°C，熱水可能已經在外漏。"},
+     {d:"pressure",label:"井口壓力",unit:"",v:"18 bar",st:"warn",rd:"破損處承受的壓力不小。"}],
+  gaps:["1980 年代的施工紀錄遺失。"],
+  say:["破損集中在 300–400 公尺，其他段還有 4.5 毫米以上，局部內襯可行。","淺層地下水溫從 22°C 升到 33°C，熱水可能已在外漏；封井最能根除風險。","降壓能減少外漏，但要先確認降壓後地下水溫是否停止上升。"]},
+ O:{scene:"地方記錄了八年的間歇泉。",t:["2018","2019","2020","2021","2022","2023","2024","2025"],
+  m:[{d:"geyser",label:"間歇泉每天噴發次數",unit:"次",s:[24,23,21,18,15,12,10,8],base:24,st:"bad",rd:"八年從 24 次減少到 8 次，只剩三分之一。"},
+     {d:"reinject",label:"周邊回注率",unit:"%",s:[80,76,70,62,55,50,48,45],st:"bad",rd:"從 80% 降到 45%，和噴發次數一起下降。"},
+     {d:"reinject",label:"最近的生產井距離泉口",unit:"",v:"600 m",st:"warn",rd:"國外曾經關閉泉口周邊一定範圍內的井。"}],
+  gaps:["哪幾口井的影響最大？","除了抽水，有沒有其他原因？"],
+  say:["最近的井只有 600 公尺；國外前例是關閉泉口周邊的井。","回注率從 80% 降到 45%，和噴發次數減少同步；提高回注有數據支持。","已有 8 年數據，趨勢很明確；再監測前，要先訂好「掉到幾次就啟動 A 或 B」。"]},
+ P:{scene:"火山噴發第 2 天，熔岩往廠區流來。",t:["0時","2時","4時","6時","8時","10時","12時","14時"],
+  m:[{d:"lava",label:"熔岩前緣距廠區",unit:"m",s:[2400,2150,1900,1700,1500,1250,1000,780],st:"bad",rd:"最近兩小時推進約 220 公尺，約每小時 110 公尺；照這個速度，大約 7 小時後到達廠區。"},
+     {d:"lava",label:"廠內易燃工作流體",unit:"",v:"約 19 萬公升",st:"bad",rd:"接觸熔岩可能起火。"},
+     {d:"pressure",label:"尚未封閉的井口",unit:"",v:"3／11 口",st:"warn",rd:"每口封井需要的時間要先估算。"}],
+  gaps:["移走易燃流體需要幾個小時、幾趟車？","熔岩流向會不會改變？"],
+  say:["大約 7 小時後到達；要先估算封 3 口井需要多久，時間不夠就先撤人。","19 萬公升易燃流體接觸熔岩可能起火；但搬運要時間，不能讓人員冒險。","備援電力能維持監測，但不會改變撤離的時程。"]}
+};
+/* 每個角色在每張事件卡的台詞與追問。第一發言人的台詞為 null，使用卡片上印的台詞。 */
+const LINES={
+ A:{lubi:["壓力已經到 15.6 bar，我同意先停。但請給我們時間查清楚第 2 天中午為什麼開始升壓，再決定要不要整個案子停掉。","問熊仔：如果我們在期限內提出應變方案，能不能附條件恢復？"],
+    xiong:[null,"問鹿比：停機壓力 12 bar 是誰訂的？壓力超過時，為什麼沒有自動停？"],
+    lili:["燙傷的地方離步道只有 350 公尺，溪水也已經變燙了，山下的人到現在還沒接到通知！先通知大家，再談其他的。","問鹿比：下游的取水口要不要先關？"],
+    lanlan:["被燙枯的林子，可能是族人採集的地方。清理現場前，請先讓部落知道受影響的範圍。","問鹿比：3,200 平方公尺的範圍圖可以給部落看嗎？"],
+    zhizhi:["壓力從 9.4 一路升到 15.6，這不是突然發生的，紀錄裡早有徵兆。現在先讓井受控，原因之後一定要查。","問鹿比：井口防噴設備最多能承受多少壓力？"],
+    gugu:["我們先確認三件事：井受控了沒、誰該被通知、誰負責查原因。每一件都要有負責人和時間。","問全組：哪一件事最急？為什麼？"]},
+ B:{lubi:["測試期間剛好都沒下雨，乾旱也可能讓水位下降。在證明是地熱造成之前，請不要直接下結論。","問知知：要多久才能比對出兩邊的水是不是同一個來源？"],
+    xiong:["水位比基線深了 9.5 公尺，已經超過業者抽水泵的極限。原因查清之前，我傾向要求暫停或附條件。","問鹿比：測試開始和停止的時間紀錄，能不能今天交出來？"],
+    lili:[null,"問鹿比：如果查出來是測試造成的，業者這幾天的損失誰負責？"],
+    lanlan:["溫泉和溪水連在一起，部落也在用。調查結果要讓部落一起看，而不是只給業者。","問知知：下游的溪水需不需要一起監測？"],
+    zhizhi:["停測後水位只回升 0.8 公尺。同時發生不等於因果，但這個下降遠大於過去 30 天的波動，我不會忽略它。","問栗栗：業者有沒有更早以前的水位紀錄，可以補基線？"],
+    gugu:["目前有兩種解釋：測試影響，或是乾旱。我們先列出哪些數據能分辨這兩種，再來選。","問鹿比和栗栗：你們各自需要看到什麼數據，才會改變想法？"]},
+ C:{lubi:["我們確實辦了說明會，也有 38 戶簽到。如果說明方式不夠，我們願意補辦，但希望不要全部重來。","問嵐嵐：部落希望用什麼方式說明，才算聽得懂？"],
+    xiong:["簽到表不能當同意書，這在程序上站不住。沒有部落會議決議，我無法核可下一步。","問鹿比：你們送來的文件裡，哪一份能證明部落同意？"],
+    lili:["晚上 8 點到 10 點的噪音都超過 50 分貝，小孩根本睡不好。先把夜間施工停下來，這件事今天就能做。","問鹿比：夜間施工能不能從今晚就停？"],
+    lanlan:[null,"問熊仔：如果部落會議還沒開，主管機關會怎麼處理這份簽到表？"],
+    zhizhi:["126 戶只有 38 戶到場，到場率 30%。這個數字本身就說明，現在的意見還不能代表大多數受影響的人。","問嵐嵐：沒到場的 88 戶，主要是哪些人？"],
+    gugu:["這張卡有兩個問題：程序上的同意，和生活上的夜間噪音。我們要一起處理，還是先處理一個？","問全組：哪一個不能等？"]},
+ D:{lubi:["名單是照行政區做的，我們沒有刻意漏人。但如果要通知 5 個聚落，說明會的時間和成本都會增加。","問熊仔：通知範圍有沒有明確的規定？"],
+    xiong:["影響範圍應該依實際影響來劃，不是只看行政區。疊圖後是 5 個聚落，名單只有 2 個，程序不完整。","問知知：溪流 5 公里的範圍有沒有依據？"],
+    lili:["我們住在溪流下游，用的是同一條溪的水，可是名單上根本沒有我們。","問鹿比：工程車每天經過我們村子 24 趟，你們算進去了嗎？"],
+    lanlan:[null,"問栗栗：下游還有哪些人在用這條溪？"],
+    zhizhi:["溪流範圍目前是估計值。用估計值劃範圍可以，但要說清楚它的不確定性，之後用實測修正。","問鹿比：能不能先做一次溪流流向與用水調查？"],
+    gugu:["三張圖疊起來是 5 個聚落。我們先確認：這 5 個要用什麼方式通知、誰去通知、什麼時候完成。","問嵐嵐：有沒有圖上看不到、但應該要找的人？"]},
+ E:{lubi:["噪音平均值整天都低於 60 分貝，硫化氫也遠低於安全標準。我們可以調整引汽時段，但希望測試能繼續。","問栗栗：如果避開某些時段，哪幾個小時對大家影響最小？"],
+    xiong:["Leq 合格，但 Lmax 三次超過 80。我會要求把瞬間值也列入管制條件，不只看平均。","問鹿比：引汽時能不能加裝消音設備？"],
+    lili:[null,"問熊仔：沒超標，我們就只能忍耐嗎？"],
+    lanlan:["臭味和巨響傳到山下，也會傳到部落。監測站只有 1 個，部落那邊的情況沒有人量。","問鹿比：能不能在部落也設一個測站？"],
+    zhizhi:["硫化氫整天都在嗅覺閾值以上，所以大家一直聞得到，但離危險濃度還很遠。這是生活干擾，不是中毒風險，兩件事要分開談。","問栗栗：大家抱怨最多的是聲音、味道，還是兩者都有？"],
+    gugu:["數據上合格，生活上受干擾，兩邊都是真的。我們要找的是一個雙方都能接受、而且量得到的門檻。","問全組：超過多少、持續多久，就應該停？"]},
+ F:{lubi:[null,"問知知：要補哪些資料，才能判斷換位置值不值得？"],
+    xiong:["換鑽探位置等於新的開發地點，要重新評估影響範圍和諮商對象，不能沿用舊的核可。","問鹿比：新位置在哪裡？會影響哪些人？"],
+    lili:["鑽了四千公尺還不夠，下一口井會不會離溫泉更近？換位置之前，請先說清楚會不會影響我們的水。","問鹿比：新井離溫泉區多遠？"],
+    lanlan:["換位置可能會進到傳統領域。任何新井位，都要先和部落討論，不能先決定再通知。","問熊仔：新井位需要重新諮商嗎？"],
+    zhizhi:["每公里約 33°C，接近一般地殼，本井條件並不好。流量只有 8 t/h，問題可能在滲透率，換位置也不保證會更好。","問鹿比：3 公里外那口舊井的資料可信嗎？是什麼時候量的？"],
+    gugu:["這張卡是在問：要不要再花大錢。我們先釐清已知什麼、還不知道什麼、補資料要多久。","問知知：最關鍵的一筆缺漏資料是什麼？"]},
+ G:{lubi:["每公里 60°C，比上一口井好很多！我們很想加快腳步，但我同意先把流量和水質測清楚。","問知知：哪一項測試最快能完成？"],
+    xiong:["高溫不等於可以核准開發。流量、水質和滲透率都還是空白，這些是下一階段的必要條件。","問鹿比：補資料的時程表什麼時候能送來？"],
+    lili:["這麼熱的地方，會不會影響溫泉？你們說要長期監測，能不能把溫泉也一起列進去？","問知知：這口井和我們的溫泉有沒有可能相通？"],
+    lanlan:["選調查項目時，也請讓部落參與。有些地方部落有自己的知識，可以補充你們的資料。","問知知：調查項目會不會進到部落的土地？"],
+    zhizhi:[null,"問鹿比：可以先公開岩芯資料和還不知道的項目清單嗎？"],
+    gugu:["好消息是熱源，壞消息是還有三項空白。我們要決定先補哪一項、誰負責、多久完成。","問全組：如果只能先做一項，選哪一項？"]},
+ H:{lubi:["碳鋼撐不住，換材料成本會很高。我們想先做小規模試驗，確定哪種材料有效再投資。","問知知：試驗大概要多久才有結果？"],
+    xiong:["壁厚只剩 6.1 毫米，安全上已經有疑慮。重啟前，我要看到材料試驗結果和套管檢查報告。","問鹿比：套管破了的話，熱水會不會漏進地下水？"],
+    lili:["井管被腐蝕成這樣，裡面的酸水會不會漏到我們的地下水？我想知道有沒有人在量。","問知知：附近的地下水有沒有監測？"],
+    lanlan:["設備壞了要修，但也要說清楚：維修或換材料會不會增加工程車和施工天數。","問鹿比：重啟需要多少天的施工？"],
+    zhizhi:[null,"問鹿比：腐蝕速率是在哪裡、用什麼方法量的？"],
+    gugu:["這張卡大家意見接近：材料要先解決。我們要確認的是重啟的條件是什麼、誰來檢查。","問熊仔：重啟要看到哪些文件？"]},
+ I:{lubi:["停注後微震就減少了，我們願意先停止回灌。但屋子的裂縫，有些可能本來就有，需要個別確認。","問熊仔：沒有施工前照片的住戶，要怎麼認定責任？"],
+    xiong:["最大規模 2.6 已經超過黃燈 2.0，依分級規則應該降壓或停注。紅燈值也必須在恢復前訂好。","問知知：紅燈值應該訂在多少？"],
+    lili:[null,"問鹿比：我家沒有施工前的照片，損壞就不算嗎？"],
+    lanlan:["微震不會只發生在一個村子。部落的房子和祭祀場所也要一起檢查。","問鹿比：檢查範圍包不包括部落？"],
+    zhizhi:["微震次數跟著回灌壓力上升，停注後就下降，震源深度也接近回灌段，這是很強的證據；但還要確認附近有沒有活動斷層。","問鹿比：回灌井附近有沒有已知的斷層？"],
+    gugu:["兩件事要分開：一是要不要繼續回灌，二是受損住戶怎麼處理。兩件都要有人負責。","問全組：先處理哪一件？"]},
+ J:{lubi:["中午起風後濃度已經降下來了。我們同意先關井，但希望加裝除硫設備後盡快復測。","問熊仔：復測要看到什麼數據才能恢復？"],
+    xiong:[null,"問鹿比：下風處的 140 人，現在通知到幾個了？"],
+    lili:["已經有 6 個人送醫了！聞得到的時候大家會怕，聞不到的時候更可怕。我們要一個能即時警告的系統。","問鹿比：偵測器超標時，誰會通知我們？多快？"],
+    lanlan:["下風處的聚落有長輩和小孩，疏散時要用他們聽得懂的語言通知。","問熊仔：疏散通知用什麼方式發出？"],
+    zhizhi:["數據很清楚：風速低於 0.5 m/s 時，濃度一路上升。風速和風向應該納入停測門檻，不能只看濃度。","問鹿比：其他低窪處有沒有偵測器？"],
+    gugu:["人命優先，這點大家應該都同意。接下來要決定的是：什麼條件下才能恢復？","問全組：恢復測試前，一定要看到哪一個數字？"]},
+ K:{lubi:["讓部落持股，我們要和投資人討論，也要確認法律上可不可行。回饋金可以提高，這是我們馬上做得到的。","問嵐嵐：除了金額，部落最在意的是什麼？"],
+    xiong:["利益分享由雙方協商，但同意必須經過合法程序。土地能不能作價入股，要先釐清法律。","問鹿比：淨利預估有沒有經過第三方審查？"],
+    lili:["部落有回饋，那山下的溫泉業者呢？我們也承擔了風險。","問鹿比：回饋只給部落嗎？"],
+    lanlan:[null,"問鹿比：部落持股的話，董事會能不能有部落的席次？"],
+    zhizhi:["3.6 億元是用開發商自己預估的淨利算的。電廠也可能虧損，入股前要先看清楚風險。","問鹿比：如果流量不如預期，淨利會剩多少？"],
+    gugu:["這張卡在談分享，也在談決策權。我們先釐清部落要的是錢、是席次，還是兩者都要。","問嵐嵐：哪一項是部落的底線？"]},
+ L:{lubi:["重新規劃動線會增加成本和工期。我們願意調整，但希望先知道需要迴避的範圍有多大。","問嵐嵐：迴避範圍可以先給一個大概的距離嗎？"],
+    xiong:["道路離採集區只有 40 公尺，比部落要求的 100 公尺近很多。動線需要調整，否則無法核可。","問鹿比：替代路線的評估什麼時候能完成？"],
+    lili:["每天 24 趟工程車，換路線的話，會不會改走我們村子？","問鹿比：替代路線會經過哪裡？"],
+    lanlan:[null,"問熊仔：部落監督的權限可以寫進核可條件嗎？"],
+    zhizhi:["生態影響我可以評估，但文化地景的範圍，應該由部落來界定，不是由專家決定。","問嵐嵐：哪些資訊可以公開，哪些需要保密？"],
+    gugu:["施工中斷 18 天，其中 6 天在採集季。也許調整時段就能解決一部分，先看有沒有雙方都能接受的方案。","問全組：路線和時段，哪一個比較能調整？"]},
+ M:{lubi:["流量三個月掉到兩成，這口井快不能用了。酸洗最快，但我們也知道它只能治標。","問知知：阻垢系統的效果大概能維持多久？"],
+    xiong:["酸洗會產生廢液，處理方式要先送審。不管選哪個方案，廢液和排放都要符合規定。","問鹿比：酸洗廢液要怎麼處理？"],
+    lili:["酸洗用的酸和清出來的東西會排去哪裡？我們很擔心影響溪水。","問鹿比：酸洗時，溪水會不會受影響？"],
+    lanlan:["不管用哪個方法，都要說清楚施工期間會不會影響溪流和周邊的土地。","問知知：哪一種方法對環境的影響最小？"],
+    zhizhi:[null,"問鹿比：可以提供水中鈣和碳酸氫根的濃度變化嗎？"],
+    gugu:["三個方案各有代價：酸洗治標、阻垢要長期花錢、降流量會少發電。我們要選的是哪一個代價可以接受。","問全組：哪一個代價最不能接受？"]},
+ N:{lubi:["破損集中在 300 到 400 公尺，局部內襯是最省的修法。如果封井，我們就要重新申請新井。","問知知：內襯修補後能撐多久？"],
+    xiong:["淺層地下水溫升到 33°C，可能已經在漏。確認不漏之前，這口井不應該再加壓使用。","問鹿比：舊井的施工紀錄找得到嗎？"],
+    lili:["地下水溫從 22 度升到 33 度！我們的井水會不會已經被影響了？","問熊仔：誰要來檢查我們的井水？"],
+    lanlan:["如果封井後要另找新址，新井位一樣要先和部落討論。","問鹿比：新址會在哪個範圍？"],
+    zhizhi:[null,"問鹿比：可以先做一次完整的井測嗎？"],
+    gugu:["地下水溫還在上升，這是時間壓力。選方案之前，要不要先採取立即的保護措施？","問知知：多久之內一定要處理？"]},
+ O:{lubi:["關井會影響井主的收入。我們願意提高回注率，但需要時間調整設備。","問知知：回注率要提高到多少，泉況才可能恢復？"],
+    xiong:["8 年數據顯示趨勢很明確。我會考慮設定抽取上限和最低回注率，並要求定期公開。","問鹿比：每口井的抽取量有沒有紀錄？"],
+    lili:[null,"問鹿比：如果泉況繼續變差，你們會停哪幾口井？"],
+    lanlan:["間歇泉對部落也有意義，不只是觀光景點。監測和決定，都要讓部落參與。","問熊仔：泉況的監測結果會公開給部落嗎？"],
+    zhizhi:["噴發次數和回注率一起下降，8 年來趨勢一致。但還要確認是哪幾口井影響最大，才能對症下藥。","問鹿比：每口井的距離和抽取量能不能整理出來？"],
+    gugu:["數據已經有 8 年了。如果選擇再監測，一定要先訂好：掉到幾次，就採取下一步。","問全組：觸發值訂在每天幾次？"]},
+ P:{lubi:["我們會先派人封剩下的 3 口井，但只要時間不夠，就立刻撤離。","問熊仔：撤離的最後時間由誰決定？"],
+    xiong:[null,"問鹿比：封一口井需要幾個小時？"],
+    lili:["熔岩離廠區只剩 780 公尺，廠裡還有 19 萬公升易燃液體。萬一起火，煙會不會飄到我們這邊？","問熊仔：附近居民需不需要一起疏散？"],
+    lanlan:["熔岩經過的地方可能有部落的土地和文化地景。災後復原，也要讓部落參與。","問熊仔：災後評估會納入部落意見嗎？"],
+    zhizhi:["每小時推進約 110 公尺，大約 7 小時到達廠區。但熔岩流向可能改變，時間估計要每小時更新。","問鹿比：誰負責每小時回報熔岩位置？"],
+    gugu:["時間只剩大約 7 小時。我們先排順序：人、危險物、設備。每一項都要有人負責。","問全組：這個順序大家同意嗎？"]}
+};
+/* 依目前數據，各角色看到的現況。順序：鹿比、熊仔、栗栗、嵐嵐、知知、咕咕 */
+const SITU={
+ A:["井已經失控，壓力 15.6 bar 超過停機值，測試勢必中斷。最大的風險是信任：居民到現在還沒收到通知，熱水又流進溪裡，處理得慢，整個案子都可能被叫停。",
+    "壓力超過停機值 12 bar，而且還在上升，井沒有受控，屬於重大工安事件。下游溪水 31°C、居民沒有收到通知，可以要求立即停工，並限期提出應變方案。",
+    "熱水已經流進溪裡，下游 200 公尺的水溫到了 31°C，我們用的水可能受影響，可是到現在沒人通知我們。燙傷範圍離步道只有 350 公尺，家人和遊客都可能在附近。",
+    "被燙傷的 3,200 平方公尺林地和下游溪流，可能是族人採集和取水的地方。目前沒有任何一份資料提到部落，部落也還沒被通知。",
+    "壓力從第 2 天中午起連續上升，從 9.4 到 15.6 bar，是有徵兆的失控，不是隨機意外。井口硫化氫 6.5 ppm 還在安全範圍，但仍在上升；搶修前要先確認壓力回落。",
+    "數據顯示三個急迫問題同時存在：井沒受控、熱水進了溪、居民沒被通知。現在要先排出處理順序，每一項都要有人負責。"],
+ B:["溫泉水位下降，和我們加大抽水的時間重疊，看起來對我們不利。但測試期間剛好沒下雨，也沒有水化學證據證明兩者同源，現在還不能確定是測試造成的。",
+    "水位已經超過業者抽水泵的極限，業者實際受損。抽水量增加與水位下降同步，但因果還沒證實；證據補齊之前，繼續測試的風險由誰承擔，要先釐清。",
+    "出水量從每分鐘 86 公升掉到 22 公升，水溫也少了 6 度，溫泉幾乎沒辦法營業。停測 3 天了，水位只回來 0.8 公尺，我們每天都在損失。",
+    "溫泉和下游溪水可能是同一套水系，部落也在使用。現在的監測只看溫泉業者的井，沒有部落取水點的資料。",
+    "抽水量在第 2 天加大到 45 t/h，水位同一天開始下降，時間上很一致；但降雨歸零是另一個可能原因。要分辨兩者，最缺的是水化學比對和更長的基線。",
+    "目前兩種解釋都有數據支持：抽水量增加，以及連續沒下雨。大家要先同意「什麼數據可以分辨這兩種解釋」，再決定測試要不要繼續。"],
+ C:["我們有辦說明會，也有 38 戶簽到；但簽到表不能當同意，程序上確實有缺口。補開部落會議最快要 2 週，時程會延後。",
+    "現有文件只有簽到表，沒有部落會議決議，不符合諮商同意的程序要求。夜間噪音也超過約定值，兩件事都需要開發商限期改善。",
+    "晚上 8 點到 10 點噪音都在 50 分貝以上，已經好幾晚了。說明會只有 10 分鐘讓人提問，很多人根本來不及講。",
+    "126 戶只來了 38 戶，說明全用華語，族人沒聽懂就簽了名。這份簽到表不能代表部落；部落會議最快 2 週後可以召開。",
+    "到場率 30%，提問時間只占 11%，這些數字顯示意見蒐集不完整。用這份資料推論「部落同意」，證據不足。",
+    "這張卡有兩條線：程序上的同意還沒取得，生活上的夜間噪音超過約定值。夜間噪音可以馬上處理，同意程序至少要 2 週。"],
+ D:["名單是依行政區做的，只涵蓋 2 個聚落；依影響範圍疊圖要 5 個。擴大通知會增加說明會場次和成本。",
+    "疊圖後受影響的聚落有 5 個，名單只涵蓋 40%，參與程序不完整。另外，季節性使用者完全沒有調查。",
+    "我們在溪流下游，工程車也經過我們村子，卻不在名單上。最遠的聚落到會場要開 50 分鐘車，沒有公車，就算通知了也很難到。",
+    "圖上只看得到住在聚落裡的人，獵人和採集者完全沒有被調查。沒有部落協助，名單永遠會漏人。",
+    "5 個聚落是用三張圖疊出來的，但溪流範圍是估計值，季節性使用者是零資料。範圍的下限可以確定，上限還不知道。",
+    "至少有 3 個聚落確定被漏掉，還有一群人沒有調查。現在要決定的是補通知的方式、負責人和完成時間。"],
+ E:["噪音平均值和硫化氫都在標準內，測試是合格的。問題集中在每天 3 次、每次 20 分鐘的引汽；只要調整這段時間，就有機會繼續測試。",
+    "平均值合格，但瞬間最大值三次超過 80，居民打來 17 通電話。現行條件只管平均值，管制有漏洞，需要補上瞬間值的門檻。",
+    "每天 3 次巨響，最大到 92 分貝，加上一整天的臭味。下午風往山下吹，我們躲都躲不掉。",
+    "只有 1 個監測站在山下，部落的位置沒有量。下午的西南風也可能把氣味帶到部落，但沒有資料可以證明或排除。",
+    "硫化氫最高 0.08 ppm，聞得到，但遠低於危害濃度；噪音問題來自瞬間值，不是平均值。這是生活干擾，而且原因很明確：引汽時段。",
+    "數據合格和居民受干擾，兩件事同時成立。超標集中在引汽的 3 個時段，討論可以聚焦在這 60 分鐘怎麼處理。"],
+ F:["這口井的流量只有目標的兩成，預算已經用了 70%。3 公里外的舊井顯示附近可能更熱，但再鑽一口要 2–3 年，剩下的錢也不夠。",
+    "本井沒有達到開發條件。如果要換位置，就是新的開發地點，影響評估和諮商都要重新來。",
+    "四千公尺的井沒有結果，開發商可能會往別處鑽。新的位置在哪裡、會不會更靠近溫泉，目前都沒有說明。",
+    "換位置的討論已經開始，但新井位可能落在傳統領域。現在還沒有任何一份資料提到部落的土地。",
+    "本井梯度每公里約 33°C，接近一般地殼；流量低，問題很可能出在滲透率，而不是溫度。舊井的每公里 50°C 只有一個點，不足以支持換位置。",
+    "已知：本井熱度普通、流量不足、預算吃緊。未知：滲透率，以及附近真正的熱源在哪裡。決定前要先問：補哪一筆資料最划算？"],
+ G:["每公里約 60°C，比上一口井好很多，岩芯資料也很完整。只要流量和水質沒問題，這裡很有希望。",
+    "溫度條件良好，但流量、水質、滲透率三項必要資料仍是空白，現在還不能進入開發階段的審查。",
+    "這麼熱的地方離溫泉有多遠、會不會相通，目前的資料都沒有提到。",
+    "後續的調查項目還沒決定。哪些調查會進到部落的土地、需不需要諮商，現在正是提出意見的時機。",
+    "溫度剖面很好，300–1,200 公尺的黏土層像蓋子，可能把熱水封在下面，這是好的地質訊號。但真正決定能不能開發的流量和滲透率，都還沒量。",
+    "熱源條件好，但有三項關鍵資料是空白。現在要討論的是：先補哪一項、要花多少時間。"],
+ H:["碳鋼每年腐蝕 3.6 毫米，是設計值的 3 倍多，現有井管撐不住。換耐蝕合金要貴 5 倍，已經停機 21 天，每拖一天成本都在增加。",
+    "套管壁厚只剩 6.1 毫米，已有安全疑慮。重啟前，必須提出材料試驗和套管檢查的結果。",
+    "pH 2.8 的強酸水在井管裡，管子又已經被吃掉將近一半。如果破了，酸水會不會進到我們的地下水？",
+    "已經停機 21 天，接下來不管修還是換材料，都可能增加工程車和施工天數，部落需要知道施工會怎麼安排。",
+    "pH 2.8 加上氯離子 4,200 mg/L，是典型的高腐蝕性流體，碳鋼腐蝕超標的原因很清楚。缺的是耐蝕材料在這種流體中的實測數據。",
+    "問題的原因很明確，大家的分歧在成本和時程。要討論的是：重啟前一定要達成哪些條件、由誰檢查。"],
+ I:["停注後微震從 63 次降到 8 次，顯示停止回灌有效。7 戶通報裂縫，只有 2 戶有施工前照片，其他住戶的損害難以釐清。",
+    "最大規模 2.6 超過黃燈 2.0，依分級規則應停止回灌。紅燈值訂出來之前，不應恢復注水。",
+    "有 12 戶不敢回家，借住在親友家。我們家沒有施工前的照片，牆上的裂縫到底算不算數？",
+    "目前只檢查了通報的 7 戶，部落的房子和祭祀場所有沒有受影響，沒有人去看。",
+    "微震次數跟著回灌壓力變化，震源深度 3.5–4.5 公里也接近回灌段，兩者相關的證據很強。還缺的是附近有沒有活動斷層的資料。",
+    "微震和回灌的關聯已經很明顯。剩下的爭議是：何時、在什麼條件下能恢復，以及受損住戶怎麼處理。"],
+ J:["中午起風後濃度已降到 3.2 ppm，但上午最高到 18.4 ppm，有 6 人送醫。偵測器只有井口 1 個，現在無法證明村子裡是安全的。",
+    "下風處濃度超過 10 ppm，已造成 6 人送醫，屬於公共安全事件。加裝偵測器、設定停測門檻之前，不應恢復測試。",
+    "已經 6 個人送醫了，村子裡卻沒有任何偵測器。我們只能等到有人不舒服，才知道出事了。",
+    "最近的民宅在 650 公尺外的山谷低處，那裡住著長輩和小孩。疏散通知要讓每個人都聽得懂。",
+    "風速低於 0.5 m/s 時濃度持續累積，起風後就下降，風速是關鍵。只有井口 1 個偵測器，無法知道低窪處的真實濃度。",
+    "安全問題已經發生，討論的重點是恢復條件：要看到哪些數字、裝好哪些設備，才能重新開始。"],
+ K:["部落會議有 82% 贊成退回回饋金，這是集體決定，不能忽視。持股 10% 等於要出資或用土地作價約 5 億元，需要和投資人重新協商。",
+    "部落意見經過部落會議表決，具有正當性。利益分享方式由雙方協商，但土地作價入股在法律上是否可行，要先確認。",
+    "回饋金只談部落，可是山下的溫泉業者也承擔了水位和噪音的風險，目前的方案沒有包括我們。",
+    "82% 的族人贊成退回，因為 500 元買不走 30 年的土地與風險。目前方案中部落的董事席次是 0 席，部落沒有任何決策權。",
+    "3.6 億元是用開發商自己的淨利預估算出來的，沒有經過第三方審查。電廠也可能虧損，股權不一定比固定回饋金好。",
+    "部落的訴求很清楚：要分享，也要決策權。討論可以分成兩部分：金額怎麼算，席次怎麼給。"],
+ L:["替代路線長 1.8 公里，工期多 6 週，可以避開採集區。另一種做法是保留原路線，但避開 3–5 月的採集季施工。",
+    "道路離採集區只有 40 公尺，未達部落要求的 100 公尺。現行工程動線需要修正，才能符合核可條件。",
+    "每天 24 趟工程車，如果改走替代路線，車子會經過哪些地方，目前還沒有說明。",
+    "採集區離道路只有 40 公尺，3 到 5 月採集季時通路還會中斷 6 天。祭祀地在 220 公尺外，目前沒有直接受影響。",
+    "距離和時間都可以量：迴避距離差 60 公尺，採集季中斷 6 天。但文化地景的範圍應由部落界定，我只能提供生態評估。",
+    "有兩條解決路線：改路線（多 6 週），或改時段（避開採集季）。先問部落和開發商，哪一條比較能接受。"],
+ M:["發電量三個月從 5 MW 掉到 1 MW，這口井快沒有收益了。酸洗最快，但每 4–6 週就要洗一次，長期成本很高。",
+    "不管選哪個方案，酸洗廢液和排放都要先送審。目前沒有任何一份廢液處理計畫。",
+    "每 4 到 6 週要酸洗一次，代表每個月都有酸性廢液要處理。這些廢液會不會流進溪裡，是我最擔心的事。",
+    "清井會變成例行工作，施工車輛和廢液處理會長期存在。部落需要知道這會持續多久。",
+    "飽和指數 +1.4、井內 420 公尺就開始沸騰，結垢的原因很清楚。酸洗只能治標；要根本解決，得控制沸騰位置或加阻垢劑。",
+    "原因已經清楚，三個方案的差別在代價：短期花錢、長期花錢，或少發電。"],
+ N:["破損集中在 300–400 公尺，其他段還算完整，局部內襯是最便宜的修法。如果封井，就要另外申請新井，時間和成本都會大幅增加。",
+    "淺層地下水溫半年內從 22°C 升到 33°C，熱水可能已經外漏，附近還有 4 口民井。確認不漏之前，這口井不應繼續加壓使用。",
+    "500 公尺內有 4 口民井，地下水已經變熱了。我們的井水能不能喝，現在沒有人告訴我們。",
+    "如果最後決定封井、另找新址，新的井位會在哪裡，需要先和部落討論。",
+    "1984 年的套管在 400 公尺處只剩 1.2 毫米，地下水溫又持續上升，兩項數據都指向套管已經洩漏。缺的是原始施工紀錄。",
+    "地下水溫還在上升，這是有時間壓力的問題。要先決定立即的保護措施，再討論長期要修還是要封。"],
+ O:["8 年來回注率從 80% 降到 45%，泉況也跟著變差，抽取確實可能有影響。提高回注要花錢改設備，關井則會直接損失收入。",
+    "8 年的資料趨勢一致，已經足以支持管制措施，例如抽取上限和最低回注率。",
+    "間歇泉從每天 24 次剩下 8 次，觀光客少了三成。泉況變差，直接影響我們的生計。",
+    "間歇泉對部落有文化意義，不只是觀光景點。目前的監測和決策，都沒有部落參與。",
+    "噴發次數、回注率和地下壓力三條曲線同步下降，8 年的趨勢很一致。還要找出哪幾口井影響最大，才能對症下藥。",
+    "數據已經很清楚，爭議在處理方式：關井、限制抽取加回注，還是繼續監測。如果選繼續監測，要先訂好觸發值。"],
+ P:["熔岩大約 7 小時後到達，還有 3 口井沒封、19 萬公升易燃液體沒移走，廠區還有 18 人在作業。",
+    "人員安全優先。撤離道路距熔岩只剩 1.2 公里，必須在道路被切斷前完成撤離，並訂出撤離的最後時限。",
+    "廠裡有 19 萬公升易燃液體，萬一起火，煙會往哪裡飄？附近居民要不要一起疏散，目前沒有人說。",
+    "熔岩流過的地方可能有部落的土地和文化地景。現在要先保住人命，但災後的評估要讓部落參與。",
+    "熔岩每小時推進約 110 公尺，7 小時是用目前速度推算的。流向和速度都可能改變，這個時間每小時都要重新估算。",
+    "時間大約剩 7 小時，要同時處理人員、易燃物和封井。先排優先順序，每一項都要有人負責、有完成時限。"]
+};
+const situ=(eid,rid)=>SITU[eid][ROLE_ORDER.indexOf(rid)];
+/* 每張卡追加的現場數據 */
+const EXTRA={
+ A:[{d:"water_quality",label:"下游 200 m 溪水溫度",unit:"°C",s:[18,18,18,18,18,19,22,31],base:18,st:"bad",rd:"井噴後溪水升到 31°C，表示熱水已經流進溪裡。"},
+    {d:"h2s",label:"井口附近硫化氫",unit:"ppm",s:[0.2,0.3,0.2,0.3,0.4,0.6,1.8,6.5],lim:10,st:"warn",rd:"井噴後升到 6.5 ppm。還沒到 10 ppm，但搶修人員必須配戴偵測器。"}],
+ B:[{d:"reinject",label:"地熱井抽水量",unit:"t/h",s:[0,0,0,30,45,45,0,0],st:"warn",rd:"第 2、3 天抽水量加大到 45 t/h，溫泉水位也是從第 2 天開始明顯下降。"},
+    {d:"spring_flow",label:"溫泉水溫",unit:"°C",s:[52,52,51,51,49,46,46,47],base:52,st:"warn",rd:"水溫也下降了 6°C，代表流進溫泉的熱水變少了。"}],
+ C:[{d:"consent",label:"說明會時間",unit:"",v:"90 分鐘（提問 10 分鐘）",st:"warn",rd:"大部分時間是簡報，族人提問的時間很少。"},
+    {d:"consent",label:"最快可召開部落會議",unit:"",v:"2 週後",st:"ok",rd:"依部落慣例需要提前公告；補辦程序大約會延後 2 週。"}],
+ D:[{d:"coverage",label:"季節性使用者（獵人、採集者）",unit:"",v:"沒有調查",st:"na",rd:"他們不住在聚落裡，戶籍和名單上都找不到。"},
+    {d:"traffic",label:"最遠聚落到說明會場",unit:"",v:"車程 50 分鐘，沒有公車",st:"warn",rd:"就算被通知，交通也可能讓人來不了。"}],
+ E:[{d:"noise",label:"引汽時段",unit:"",v:"每天 3 次，每次約 20 分鐘",st:"warn",rd:"Lmax 超標都發生在這 3 個時段，其他時間都合格。"},
+    {d:"h2s",label:"下午風向",unit:"",v:"西南風，吹往山下",st:"warn",rd:"下午的風把氣味帶往山下，所以下午的抱怨最多。"}],
+ F:[{d:null,label:"這口井的花費",unit:"",v:"約 4 億元（預算已用 70%）",st:"warn",rd:"再鑽一口新井，剩下的預算不夠。"},
+    {d:null,label:"再鑽一口新井需要的時間",unit:"",v:"約 2–3 年",st:"warn",rd:"包含選址、重新申請、諮商和鑽井。"}],
+ G:[{d:"perm",label:"岩芯取得率",unit:"",v:"85%（約 1,700 m 有岩芯）",st:"ok",rd:"大部分深度都有樣本，資料相當完整。"},
+    {d:"perm",label:"岩芯中的黏土礦物",unit:"",v:"300–1,200 m 段很多",st:"warn",rd:"黏土層通常不透水，像蓋子一樣蓋在熱水層上方，也代表過去曾有熱水流過。"}],
+ H:[{d:null,label:"耐蝕合金價格",unit:"",v:"約碳鋼的 5 倍",st:"warn",rd:"換材料能解決腐蝕，但成本會大幅增加。"},
+    {d:null,label:"已停機天數",unit:"",v:"21 天",st:"warn",rd:"停機越久，探勘時程延後越多。"}],
+ I:[{d:"quake",label:"微震震源深度",unit:"",v:"多數在 3.5–4.5 km",st:"bad",rd:"和回灌段的深度接近，支持微震和回灌有關。"},
+    {d:"crack",label:"暫時借住親友家的住戶",unit:"",v:"12 戶",st:"warn",rd:"居民擔心房屋安全，不敢回家。"}],
+ J:[{d:"h2s",label:"硫化氫偵測器",unit:"",v:"1 個（在井口）",st:"warn",rd:"下風處的村子沒有偵測器，只能等居民身體不舒服才知道。"},
+    {d:"coverage",label:"下風處最近的民宅",unit:"",v:"650 m，位在山谷低處",st:"warn",rd:"硫化氫比空氣重，低處最容易積聚。"}],
+ K:[{d:"consent",label:"部落會議表決",unit:"",v:"82% 贊成退回回饋金",st:"ok",rd:"這是經過部落會議的集體決定，不是個人意見。"},
+    {d:"benefit",label:"開發商預估總投資",unit:"",v:"約 50 億元",st:"warn",rd:"10% 股權約等於 5 億元，要用出資或土地作價來換。"}],
+ L:[{d:"culture",label:"採集季",unit:"",v:"每年 3–5 月",st:"warn",rd:"施工排程裡的 6 天通路中斷，正好落在這段時間。"},
+    {d:"traffic",label:"替代路線",unit:"",v:"長 1.8 km，工期多 6 週",st:"warn",rd:"可以避開採集區，但成本和工期都會增加。"}],
+ M:[{d:"flow",label:"發電量",unit:"MW",s:[5,4.4,3.5,2.7,1.9,1.4,1],base:5,st:"bad",rd:"跟著流量一起下降，三個月只剩兩成。"},
+    {d:"scale",label:"預估清井週期",unit:"",v:"每 4–6 週一次",st:"bad",rd:"如果只靠酸洗，清井會變成例行工作。"}],
+ N:[{d:"corrosion",label:"套管完成年份",unit:"",v:"1984 年",st:"warn",rd:"已使用 40 年以上，原始材料規格不明。"},
+    {d:"water_quality",label:"500 m 內的民井",unit:"",v:"4 口",st:"warn",rd:"淺層地下水如果受影響，這些井會最先受到衝擊。"}],
+ O:[{d:"reinject",label:"地下熱水層壓力",unit:"bar",s:[12,11.8,11.5,11.1,10.6,10.2,9.9,9.7],base:12,st:"bad",rd:"8 年下降 2.3 bar，把泉水推上地表的力量變小了。"},
+    {d:"geyser",label:"間歇泉觀光人次",unit:"",v:"比 2018 年減少 30%",st:"warn",rd:"泉況變差，也影響地方生計。"}],
+ P:[{d:null,label:"廠區人員",unit:"",v:"38 人，已撤離 20 人",st:"warn",rd:"還有 18 人在封井和搬運。"},
+    {d:"traffic",label:"撤離道路距熔岩前緣",unit:"",v:"1.2 km",st:"warn",rd:"道路被切斷前，必須完成撤離。"}]
+};
+for(const k in EXTRA)SIM[k].m.push(...EXTRA[k]);
+SIM.A.gaps[0]="熱水流進溪裡之後，會影響到多遠的下游？";
+SIM.A.say[1]="燙傷範圍離步道約 350 公尺，下游溪水已經升到 31°C，熱水確定流進溪裡；通報範圍要包含下游用水的人。";
+SIM.I.gaps[0]="震源的位置是否落在已知的斷層上？";
+SIM.L.gaps[1]="替代路線會不會經過其他敏感地點？";
+EVENTS.find(e=>e.id==="A").data.push("water_quality","h2s");
+const ST={ok:["正常","●","var(--st-good)"],warn:["注意","▲","var(--st-warn)"],bad:["警戒","✕","var(--st-bad)"],na:["缺資料","?","var(--st-na)"]};
+
+const TABS=[["draw","抽卡現場"],["role","我的身分"],["events","事件卡 A–P"],["judge","判斷卡"]];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rc=id=>`--rc:var(--r-${id})`;
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let role=ROLE_ORDER.includes(store.get("myRole"))?store.get("myRole"):"lili";
+let tab="draw", evFilter="all";
+let pickerCollapsed=!!store.get("myRole");
+
+function rolesUsing(did){return ROLE_ORDER.filter(r=>ROLES[r].data[did])}
+function eventsUsing(did){return EVENTS.filter(e=>e.data.includes(did)).map(e=>e.id)}
+
+function renderPicker(){
+  const me=ROLES[role];
+  $("#picker").classList.toggle("collapsed",pickerCollapsed);
+  $("#picker").innerHTML=`<div class="mebar" style="${rc(role)}"><span class="av">${me.ch}</span><b>我是${me.name}・${me.title}</b><button type="button" id="me-change">換角色</button></div>`+'<span class="lab">我的角色</span>'+ROLE_ORDER.map(id=>{const r=ROLES[id];
+    return `<button class="rolebtn" style="${rc(id)}" aria-pressed="${id===role}" data-role="${id}"><span class="av">${r.ch}</span><span><b>${r.name}</b><small>${r.title}</small></span></button>`}).join("");
+}
+function renderTabs(){
+  $("#tabs").innerHTML=TABS.map(([k,l])=>`<button class="tab" role="tab" id="t-${k}" aria-selected="${k===tab}" data-tab="${k}">${l}</button>`).join("");
+  TABS.forEach(([k])=>{$("#p-"+k).hidden=k!==tab});
+}
+function dataBtn(did){return `<b>${esc(DATA[did].name)}</b>`}
+
+function renderRole(){
+  const r=ROLES[role];
+  const lead=EVENTS.filter(e=>e.spk===role);
+  $("#p-role").innerHTML=`
+  <div class="rolehead" style="${rc(role)}"><span class="av">${r.ch}</span>
+    <div><span class="eyebrow">${r.title}</span><h2>我是${r.name}</h2><p class="lede" style="margin:0">${r.identity}</p></div></div>
+  <div class="facts">
+    <div class="fact"><span class="eyebrow">立場</span><p>${r.stance}</p></div>
+    <div class="fact"><span class="eyebrow">我的責任</span><p>${r.duty}</p></div>
+    <div class="fact"><span class="eyebrow">這局想爭取</span><p>${r.goal}</p></div>
+  </div>
+  <div class="section"><h3>我最需要看的數據，以及它對我代表什麼</h3>
+    <div class="mydata">${Object.entries(r.data).map(([did,m])=>`<div class="row"><div>${dataBtn(did)}<span class="unit">${esc(DATA[did].unit)}</span></div><p>${m}</p></div>`).join("")}</div></div>
+  <div class="section"><h3>看到數據時，先問自己</h3><ul class="plain">${r.questions.map(q=>`<li>${q}</li>`).join("")}</ul></div>
+  <div class="section"><h3>這些說法要小心</h3><div class="misread">${r.misread.map(([q,a])=>`<div><q>${q}</q><br>${a}</div>`).join("")}</div></div>
+  <div class="section"><h3>我是第一發言人的事件卡</h3>
+    ${lead.length?`<div class="chips">${lead.map(e=>`<button class="chip" data-ev="${e.id}"><span class="letter">${e.id}</span>${e.title}</button>`).join("")}</div>`
+     :`<p class="hint">咕咕不擔任第一發言人，負責抽卡、計時，並在最後統整判定。</p>`}</div>
+  ${role==="gugu"?`<div class="section"><h3>四顆地熱石：最終判定的評分標準</h3><div class="stones">
+    <div class="stone"><b>證據 0–5</b><span>找得到案件、階段、文件或資料位置</span></div>
+    <div class="stone"><b>程序 0–5</b><span>角色不越權，理由與責任人有留下來</span></div>
+    <div class="stone"><b>參與 0–5</b><span>在地意見真的改變了條件或決策</span></div>
+    <div class="stone"><b>適應 0–5</b><span>事件發生後有期限、監測與備案</span></div></div>
+    <p class="hint" style="margin-top:8px">達標：總分至少 14／20，且每一項都不低於 3 分。</p></div>`:""}
+  <div class="secret" style="${rc(role)}"><span class="eyebrow">秘密任務</span><p style="margin:0">${r.secret}　完成可加 1 分；但如果因此跳過證據、權利或安全，反而扣 2 分。</p></div>`;
+}
+
+function renderEvents(){
+  const r=ROLES[role];
+  const list=EVENTS.filter(e=>evFilter==="all"||(evFilter==="lead"&&e.spk===role)||(evFilter==="mine"&&e.data.some(d=>r.data[d])));
+  $("#p-events").innerHTML=`
+  <h2>事件卡 A–P</h2>
+  <p class="lede">每張卡列出這個事件要看的數據、數據怎麼讀，以及三個選項各需要什麼依據、要付出什麼代價。選項沒有標準答案，重點是說得出依據。</p>
+  <div class="filters">
+    <button class="chip ${evFilter==="all"?"on":""}" data-evf="all">全部 16 張</button>
+    <button class="chip ${evFilter==="mine"?"on":""}" data-evf="mine">跟${r.name}的數據有關</button>
+    <button class="chip ${evFilter==="lead"?"on":""}" data-evf="lead">${r.name}是第一發言人</button>
+  </div>
+  <div class="evlist">${list.length?list.map(e=>{const s=ROLES[e.spk];const mine=e.data.filter(d=>r.data[d]);
+    return `<details class="ev" id="ev-${e.id}" style="${rc(e.spk)}">
+    <summary><span class="core">${e.id}</span><span class="evt">${e.title}${e.spk===role?'<span class="mine">我先發言</span>':''}<span class="src">${e.src}</span></span><span class="spk">${s.name}・${s.title}</span></summary>
+    <div class="evbody">
+      <p style="margin:0"><b>發生了什麼？</b>${e.what}</p>
+      <details class="sixsitu"><summary><b>六個角色看到的現況</b></summary><div class="alllines" style="margin-top:8px">${ROLE_ORDER.map(id=>`<div class="ln ${id===role?"me":""}" style="${rc(id)}"><b>${ROLES[id].name}：</b>${situ(e.id,id)}</div>`).join("")}</div></details>
+      <div><h3>六個角色的台詞</h3><div class="alllines">${ROLE_ORDER.map(id=>{const L=LINES[e.id][id],R=ROLES[id];return `<div class="ln ${id===role?"me":""}" style="${rc(id)}"><b>${R.name}${id===e.spk?"（第一發言人）":""}：</b>「${L[0]||e.line}」<span class="ask">${L[1]}</span></div>`}).join("")}</div></div>
+      <div><h3>要看的數據</h3><div class="chips">${e.data.map(d=>`<span class="chip ${r.data[d]?"on":""}" style="cursor:default">${DATA[d].name}</span>`).join("")}</div>
+        <p class="hint" style="margin-top:6px">標黃色的，是${r.name}最需要看的數據。</p></div>
+      <div class="meaning"><h3>數據背後的意義</h3><p>${e.meaning}</p></div>
+      <div><h3>三個選項：需要的依據與代價</h3><div class="opts">${e.opts.map((o,i)=>`<div class="opt"><h4><span class="letter">${"ABC"[i]}</span>　${o[0]}</h4><p>${o[1]}</p></div>`).join("")}</div></div>
+      <div class="foryou" style="${rc(role)}"><h3>${r.name}（${r.title}）看這張卡</h3>
+        ${mine.length?mine.map(d=>`<p><b>${DATA[d].name}：</b>${r.data[d]}</p>`).join(""):`<p>這張卡沒有你最常用的數據。可以從「${r.questions[0]}」開始提問，或請${s.name}說明他的依據。</p>`}</div>
+    </div></details>`}).join(""):`<p class="hint">沒有符合的事件卡。</p>`}</div>`;
+}
+
+const J={ev:"B",opt:"0",basis:"溫泉水位一夕下降 9.5 公尺，而且下降的時間和測試期間重疊。",lack:"施工前的溫泉水位基線，以及同期降雨和其他抽水井的資料",who:"鹿比（開發商）委託第三方監測單位",when:"恢復測試"};
+function renderJudge(){
+  const r=ROLES[role];
+  $("#p-judge").innerHTML=`
+  <h2>判斷卡</h2>
+  <p class="lede">每輪辯論前，用這個句型整理自己的想法：「我的判斷是＿＿，依據是＿＿；仍缺＿＿，應由＿＿在＿＿前處理。」下面已填入一個範例，可以直接改寫。</p>
+  <div class="judge">
+    <form class="jf" id="jf">
+      <label for="j-ev">事件卡<select id="j-ev">${EVENTS.map(e=>`<option value="${e.id}" ${e.id===J.ev?"selected":""}>${e.id}　${e.title}</option>`).join("")}</select></label>
+      <label for="j-opt">我的判斷<select id="j-opt"></select></label>
+      <div><span class="hint">這張卡的數據，點一下就加入「依據」：</span><div class="chips" id="j-chips" style="margin-top:4px"></div></div>
+      <label for="j-basis">依據是（引用數據）<textarea id="j-basis">${esc(J.basis)}</textarea></label>
+      <label for="j-lack">仍缺（哪些資料或條件）<textarea id="j-lack">${esc(J.lack)}</textarea></label>
+      <label for="j-who">應由誰處理<textarea id="j-who" style="min-height:44px">${esc(J.who)}</textarea></label>
+      <label for="j-when">在什麼時間點之前<textarea id="j-when" style="min-height:44px">${esc(J.when)}</textarea></label>
+    </form>
+    <div class="out" style="${rc(role)}"><span class="eyebrow">${r.name}・${r.title}的判斷</span>
+      <p class="sentence" id="j-out"></p>
+      <button class="btn" id="j-copy" type="button">複製這段話</button>
+      <p class="hint" id="j-msg" role="status"></p>
+      <p class="hint">咕咕的最終判定還要再回答：哪個疑慮仍未解決？何時、用什麼標準重新檢查？</p>
+    </div>
+  </div>`;
+  fillJudgeOpts();
+}
+function fillJudgeOpts(){
+  const e=EVENTS.find(x=>x.id===J.ev);
+  $("#j-opt").innerHTML=e.opts.map((o,i)=>`<option value="${i}" ${String(i)===J.opt?"selected":""}>${"ABC"[i]}　${o[0]}</option>`).join("")+`<option value="x" ${J.opt==="x"?"selected":""}>都不選，提出修改方案</option>`;
+  $("#j-chips").innerHTML=e.data.map(d=>`<button type="button" class="chip ${ROLES[role].data[d]?"on":""}" data-add="${d}">＋ ${DATA[d].name}</button>`).join("");
+  updateJudge();
+}
+function updateJudge(){
+  const r=ROLES[role],e=EVENTS.find(x=>x.id===J.ev);
+  const choice=J.opt==="x"?"提出修改方案":`${"ABC"[+J.opt]}「${e.opts[+J.opt][0]}」`;
+  const f=v=>`<u>${esc(v.trim()||"＿＿")}</u>`;
+  $("#j-out").innerHTML=`我是${r.name}（${r.title}）。針對事件 ${e.id}「${esc(e.title)}」，我的判斷是 ${f(choice)}，依據是 ${f(J.basis)}；仍缺 ${f(J.lack)}，應由 ${f(J.who)} 在 ${f(J.when)} 前處理。`;
+}
+
+/* ---------- 抽卡現場 ---------- */
+let drawn=[];try{drawn=JSON.parse(store.get("drawn")||"[]").filter(x=>SIM[x])}catch(e){drawn=[]}
+let cur=drawn.length?drawn[drawn.length-1]:"B";
+const fmt=v=>(Math.round(v*100)/100).toLocaleString("zh-TW");
+function spark(m,t,key){
+  const W=260,H=78,pl=4,pr=50,pt=10,pb=8,n=m.s.length;
+  const ref=[m.base,m.lim].filter(v=>v!=null);
+  let lo=Math.min(...m.s,...ref),hi=Math.max(...m.s,...ref);const pad=(hi-lo)*.12||1;lo-=pad;hi+=pad;
+  const x=i=>pl+i*(W-pl-pr)/(n-1),y=v=>pt+(hi-v)*(H-pt-pb)/(hi-lo);
+  const pts=m.s.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  let lab=[];
+  if(m.lim!=null)lab.push({v:m.lim,txt:"門檻 "+fmt(m.lim),dash:"5 4"});
+  if(m.base!=null)lab.push({v:m.base,txt:"基線 "+fmt(m.base),dash:"2 3"});
+  if(lab.length===2&&Math.abs(y(lab[0].v)-y(lab[1].v))<12){const up=y(lab[0].v)<y(lab[1].v)?0:1;lab[up].dy=-5;lab[1-up].dy=7}
+  const refs=lab.map(l=>`<line x1="${pl}" x2="${W-pr}" y1="${y(l.v)}" y2="${y(l.v)}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="${l.dash}"/><text x="${W-pr+5}" y="${y(l.v)+3.5+(l.dy||0)}">${l.txt}</text>`).join("");
+  const last=n-1;
+  const desc=`${m.label}：`+m.s.map((v,i)=>`${t[i]} ${fmt(v)}`).join("、");
+  return `<div class="spark" data-key="${key}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(desc)}">
+    <line x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}" stroke="var(--line)" stroke-width="1"/>
+    ${refs}
+    <polyline points="${pts}" fill="none" stroke="var(--deep)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${x(last)}" cy="${y(m.s[last])}" r="4.5" fill="${ST[m.st][2]}" stroke="var(--surface)" stroke-width="2"/>
+    <line class="hl" x1="0" x2="0" y1="${pt}" y2="${H-pb}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>
+    <circle class="hd" r="4" fill="var(--deep)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>
+    <rect x="0" y="0" width="${W-pr+4}" height="${H}" fill="transparent"/>
+  </svg><span class="tip" hidden></span></div>`;
+}
+function renderDraw(){
+  const r=ROLES[role],e=EVENTS.find(x=>x.id===cur),sim=SIM[cur],s=ROLES[e.spk];
+  const tiles=sim.m.map((m,i)=>{
+    const st=ST[m.st],mine=!!r.data[m.d];
+    const t=m.t||sim.t;
+    const val=m.s?`${fmt(m.s[m.s.length-1])}<small>${esc(m.unit)}</small>`:esc(m.v);
+    let cmp="";
+    if(m.s){const parts=[];if(m.base!=null){const d=m.s[m.s.length-1]-m.base;parts.push(`比基線 ${d>=0?"+":"−"}${fmt(Math.abs(d))}`)}if(m.lim!=null)parts.push(`門檻 ${fmt(m.lim)}`);parts.push(`最新：${t[t.length-1]}`);cmp=parts.join("｜")}
+    return `<article class="tile ${mine?"focus":""}" style="${rc(role)}">
+      <div class="hd"><span class="lbl">${esc(m.label)}</span><span class="st ${m.st}" style="--sc:${st[2]}"><i aria-hidden="true">${st[1]}</i>${st[0]}</span></div>
+      <div class="val">${val}</div>
+      ${cmp?`<div class="cmp">${cmp}</div>`:""}
+      ${m.s?spark(m,t,cur+i):""}
+      <p class="rd">${m.rd}</p>
+      ${mine?`<div class="mini"><span class="yours">${r.name}的重點</span></div>`:""}
+      ${m.d?`<details><summary>這個數據怎麼讀</summary><p style="margin:4px 0">${DATA[m.d].read}</p><p style="margin:0"><b>參考：</b>${DATA[m.d].ref}</p></details>`:""}
+      ${m.s?`<details><summary>看數據表</summary><table><tbody>${m.s.map((v,j)=>`<tr><th scope="row">${t[j]}</th><td>${fmt(v)} ${esc(m.unit)}</td></tr>`).join("")}</tbody></table></details>`:""}
+    </article>`}).join("");
+  const mineM=sim.m.filter(m=>r.data[m.d]);
+  $("#p-draw").innerHTML=`
+  <h2>抽卡現場</h2>
+  <p class="lede">咕咕抽出事件卡、唸完卡片後，每個人在自己的手機上按同一張卡的字母。畫面會顯示霧谷一號此刻的現場數據，幫你在三個選項之間做判斷。</p>
+  <div class="drawbar">
+    <span class="hint" style="flex-basis:100%">桌上抽到哪張事件卡，就按卡片右下角的字母：</span>
+    <div class="letters" role="group" aria-label="選擇事件卡">${EVENTS.map(x=>`<button class="lt ${x.id===cur?"on":""} ${drawn.includes(x.id)?"done":""}" type="button" data-lt="${x.id}" aria-pressed="${x.id===cur}" aria-label="事件卡 ${x.id}：${x.title}">${x.id}</button>`).join("")}</div>
+    <div class="drawn">本局已抽（${drawn.length}／4）：${drawn.length?drawn.map((x,i)=>`<button class="chip ${x===cur?"on":""}" data-cur="${x}" style="padding:0 8px">事件${"一二三四"[i]||i+1}・${x}</button>`).join(""):"還沒抽"}</div>
+    <button class="btn ghost" id="dr-reset" type="button" ${drawn.length?"":"disabled"}>重新開一局</button>
+  </div>
+  ${drawn.length?"":`<span class="sample">目前顯示範例：事件 B。按下你們抽到的字母後，會換成這一輪的事件。</span>`}
+  <div class="drawhead" style="${rc(e.spk)}"><span class="core">${e.id}</span>
+    <div><h2 style="margin:0">${e.title}</h2><p class="hint" style="margin:2px 0 0">${sim.scene}　第一發言人：<b style="color:var(--rc)">${s.name}（${s.title}）</b></p></div></div>
+  ${myLineBox(e)}
+
+  ${mineM.length?`<div class="foryou" style="${rc(role)};margin-bottom:20px"><h3>${r.name}（${r.title}）：先看這幾項</h3>${[...new Set(mineM.map(m=>m.d))].map(d=>`<p>${mineM.filter(m=>m.d===d).map(m=>`<span class="st ${m.st}" style="--sc:${ST[m.st][2]}"><i aria-hidden="true">${ST[m.st][1]}</i>${ST[m.st][0]}</span>　<b>${esc(m.label)}：</b>${m.s?fmt(m.s[m.s.length-1])+" "+esc(m.unit):esc(m.v)}`).join("<br>")}<br><span class="hint">${r.data[d]}</span></p>`).join("")}<p class="hint">做判斷時，先問自己：${r.questions[0]}</p></div>`:""}
+  <div class="section"><h3>現場數據</h3>
+    ${mineM.length?`<p class="hint" style="margin-bottom:10px">加框的是${r.name}最需要看的數據。</p>`:`<p class="hint" style="margin-bottom:10px">這張卡沒有${r.name}最常用的數據，可以先追問其他角色的依據。</p>`}
+    <div class="tiles">${tiles}</div></div>
+
+  <div class="section unknown"><h3>目前還不知道的事</h3><ul class="gaplist">${sim.gaps.map(g=>`<li>${g}</li>`).join("")}</ul>
+    <p class="hint" style="margin-top:6px">缺資料不等於沒風險。決定時要說清楚：這些缺口由誰、在什麼時候補上。</p></div>
+
+  <div class="section situ" style="${rc(role)}"><span class="eyebrow">依目前的數據</span><h3>${r.name}（${r.title}）看到的現況</h3><p>${situ(e.id,role)}</p></div>
+
+  <div class="section"><h3>三個選項</h3>
+    <div class="opts">${e.opts.map((o,i)=>`<div class="opt"><h4><span class="letter">${"ABC"[i]}</span>　${o[0]}</h4><p class="hint">代價與前提：${o[1]}</p></div>`).join("")}</div>
+    <p class="hint" style="margin-top:8px">沒有標準答案。全組達成共識後，用迴紋針夾住選項；也可以提出修改後的選項。</p></div>
+
+  <button class="btn" type="button" data-judge="${e.id}">用這些數據寫判斷卡</button>`;
+}
+function myLineBox(e){
+  const r=ROLES[role],L=LINES[e.id][role],s=ROLES[e.spk],lead=role===e.spk;
+  return `<div class="myline" style="${rc(role)}">
+    <span class="eyebrow">${lead?"你是第一發言人：請先唸這段台詞":`${r.name}（${r.title}）的台詞`}</span>
+    <p class="say">「${lead?e.line:L[0]}」</p>
+    <p class="ask"><b>接著追問</b>　${L[1]}</p>
+    ${lead?"":`<p class="hint" style="margin:0">第一發言人是${s.name}，請等${s.name}唸完卡片上的台詞後再發言。</p>`}
+  </div>`;
+}
+function hoverSpark(ev){
+  const box=ev.target.closest(".spark");if(!box)return;
+  const [eid,idx]=[box.dataset.key[0],+box.dataset.key.slice(1)];
+  const m=SIM[eid].m[idx],t=m.t||SIM[eid].t,svg=box.querySelector("svg");
+  const W=260,H=78,pl=4,pr=50,pt=10,pb=8,n=m.s.length;
+  const rect=svg.getBoundingClientRect(),sx=(ev.clientX-rect.left)*W/rect.width;
+  const i=Math.max(0,Math.min(n-1,Math.round((sx-pl)/((W-pl-pr)/(n-1)))));
+  const ref=[m.base,m.lim].filter(v=>v!=null);
+  let lo=Math.min(...m.s,...ref),hi=Math.max(...m.s,...ref);const pad=(hi-lo)*.12||1;lo-=pad;hi+=pad;
+  const x=pl+i*(W-pl-pr)/(n-1),y=pt+(hi-m.s[i])*(H-pt-pb)/(hi-lo);
+  const hl=svg.querySelector(".hl"),hd=svg.querySelector(".hd"),tip=box.querySelector(".tip");
+  hl.setAttribute("x1",x);hl.setAttribute("x2",x);hl.setAttribute("visibility","visible");
+  hd.setAttribute("cx",x);hd.setAttribute("cy",y);hd.setAttribute("visibility","visible");
+  tip.textContent=`${t[i]}：${fmt(m.s[i])} ${m.unit}`;tip.style.left=(x*rect.width/W)+"px";tip.style.top=(y*rect.height/H-6)+"px";tip.hidden=false;
+}
+function leaveSpark(ev){
+  const box=ev.target.closest&&ev.target.closest(".spark");if(!box)return;
+  box.querySelector(".hl").setAttribute("visibility","hidden");box.querySelector(".hd").setAttribute("visibility","hidden");box.querySelector(".tip").hidden=true;
+}
+function saveDrawn(){store.set("drawn",JSON.stringify(drawn))}
+
+function render(){renderPicker();renderTabs();renderRole();renderDraw();renderEvents();renderJudge()}
+
+function gotoEvent(id){
+  tab="events";
+  if(evFilter!=="all"&&!document.getElementById("ev-"+id)){evFilter="all"}
+  renderTabs();renderEvents();
+  const el=document.getElementById("ev-"+id);
+  if(el){el.open=true;el.scrollIntoView({block:"start"})}
+}
+
+document.addEventListener("click",ev=>{
+  const t=ev.target.closest("button");if(!t)return;
+  if(t.dataset.role){role=t.dataset.role;store.set("myRole",role);pickerCollapsed=true;render();return}
+  if(t.id==="me-change"){pickerCollapsed=false;renderPicker();return}
+  if(t.dataset.lt){cur=t.dataset.lt;if(!drawn.includes(cur)&&drawn.length<4){drawn.push(cur);saveDrawn()}renderDraw();try{history.replaceState(null,"","#"+cur)}catch(e){}return}
+  if(t.dataset.tab){tab=t.dataset.tab;renderTabs();try{history.replaceState(null,"","#"+tab)}catch(e){}return}
+  if(t.dataset.ev){gotoEvent(t.dataset.ev);return}
+  if(t.dataset.evf){evFilter=t.dataset.evf;renderEvents();return}
+  if(t.id==="dr-reset"){drawn=[];cur="B";saveDrawn();renderDraw();return}
+  if(t.dataset.cur){cur=t.dataset.cur;renderDraw();return}
+  if(t.dataset.judge){J.ev=t.dataset.judge;J.opt="0";J.basis="";J.lack=SIM[J.ev].gaps[0].replace(/[？。]$/,"");tab="judge";renderTabs();renderJudge();window.scrollTo(0,0);return}
+  if(t.dataset.add){const n=DATA[t.dataset.add].name;J.basis=(J.basis.trim()?J.basis.trim()+"；":"")+n+"：";$("#j-basis").value=J.basis;$("#j-basis").focus();updateJudge();return}
+  if(t.id==="j-copy"){const txt=$("#j-out").textContent,msg=$("#j-msg");
+    const ok=()=>{msg.textContent="已複製。"};
+    const fallback=()=>{const s=getSelection(),rg=document.createRange();rg.selectNodeContents($("#j-out"));s.removeAllRanges();s.addRange(rg);msg.textContent="無法自動複製，已選取文字，請按 Ctrl+C。"};
+    try{navigator.clipboard.writeText(txt).then(ok,fallback)}catch(e){fallback()}}
+});
+document.addEventListener("input",ev=>{
+  const id=ev.target.id;
+  const map={"j-basis":"basis","j-lack":"lack","j-who":"who","j-when":"when"};
+  if(map[id]){J[map[id]]=ev.target.value;updateJudge()}
+});
+document.addEventListener("change",ev=>{
+  if(ev.target.id==="j-ev"){J.ev=ev.target.value;J.opt="0";fillJudgeOpts()}
+  if(ev.target.id==="j-opt"){J.opt=ev.target.value;updateJudge()}
+});
+let sparkBox=null;
+document.addEventListener("pointerdown",ev=>{const box=ev.target.closest&&ev.target.closest(".spark");if(box){if(sparkBox&&sparkBox!==box)leaveSpark({target:sparkBox});sparkBox=box;hoverSpark(ev)}});
+document.addEventListener("pointermove",ev=>{if(ev.pointerType==="touch")return;
+  const box=ev.target.closest&&ev.target.closest(".spark");
+  if(sparkBox&&sparkBox!==box){leaveSpark({target:sparkBox});sparkBox=null}
+  if(box){sparkBox=box;hoverSpark(ev)}
+});
+const h=(location.hash||"").slice(1);
+if(TABS.some(([k])=>k===h))tab=h;
+if(SIM[h]){tab="draw";cur=h;if(!drawn.includes(h)&&drawn.length<4){drawn.push(h);saveDrawn()}}
+render();
+</script>
+
+</body>
+</html>
