@@ -137,8 +137,17 @@ h3{font-size:16px;margin:0 0 6px}
 .seg{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .seg button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:2px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-.era{margin:22px 0 4px}
-.era h3{font-size:16.5px;margin:0}
+.era{margin:26px 0 4px}
+.era h3{font-size:19px;margin:0;padding:4px 0 4px 10px;border-left:5px solid var(--accent);line-height:1.4}
+.era h3 .yr{display:inline-block;font-size:12.5px;font-weight:600;background:var(--accent);color:#fff;border-radius:4px;padding:0 7px;margin-right:8px;vertical-align:2px}
+.nh2{font-size:24px;margin:0 0 2px;line-height:1.35}
+.nh2 em{font-style:normal;color:var(--accent)}
+.keys{list-style:none;margin:10px 0 6px;padding:10px 12px;background:var(--accent-bg);border-radius:8px;display:grid;gap:4px}
+.keys li{font-size:14px}
+.keys b{color:var(--accent);margin-right:6px;font-variant-numeric:tabular-nums}
+.ti .hl{font-size:15.5px;font-weight:700;line-height:1.5;color:var(--ink)}
+.ti a.hl{text-decoration:none;border-bottom:1px solid var(--line)}
+.ti .dt{font-weight:600}
 .era p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
 .tl{list-style:none;margin:8px 0 0;padding:0 0 0 14px;border-left:2px solid var(--line)}
 .ti{position:relative;display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 12px;padding:8px 0;border-bottom:1px dashed var(--line)}
@@ -486,19 +495,21 @@ function pNews(){
   if(f==="event")items=items.filter(x=>x.kd==="e");
   if(f==="stage")items=items.filter(x=>x.kd==="n"&&x.stg.includes(S.stage));
   if(c)items=items.filter(x=>x.cat===c);
-  items.sort((a,b)=>a.k<b.k?-1:a.k>b.k?1:(a.kd===b.kd?0:a.kd==="e"?-1:1));
+  items.sort((a,b)=>a.k<b.k?1:a.k>b.k?-1:(a.kd===b.kd?0:a.kd==="e"?1:-1));
   const cats=["政策法規","開發案場","探勘調查","事故與爭議","火山與地震","市場與購電","背景"];
   const seg=(attr,cur,opts)=>`<div class="seg" role="group">${opts.map(([v,l])=>`<button type="button" data-${attr}="${v}" aria-pressed="${cur===v}">${l}</button>`).join("")}</div>`;
   const row=x=>x.kd==="n"
     ?`<li class="ti"><span class="dt">${esc(x.date)}</span><div><p><span class="kind">新聞</span><span class="small muted">${esc(x.media)}・${esc(x.cat)}</span></p>
-       <p><a href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.title)}</b></a>${x.own?' <span class="small muted">（標題為自擬簡稱）</span>':""}</p>
+       <p><a class="hl" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>${x.own?' <span class="small muted">（標題為自擬簡稱）</span>':""}</p>
        <p>${esc(x.sum)}</p><p class="meta">案場：${esc(x.sites)}｜階段：${esc(x.sraw)}｜角色：${esc(x.roles)}</p></div></li>`
     :`<li class="ti ev"><span class="dt">${esc(x.date)}</span><div><p><span class="kind">大事紀 ${esc(x.id)}</span><span class="small muted">${esc(x.cat)}</span></p>
-       <p><b>${esc(x.text)}</b></p><p class="meta">${x.mean&&x.mean!=="—"?`意義：${esc(x.mean)}｜`:""}來源 ${links(x.src)}</p></div></li>`;
-  const body=ERAS.map(([a,b,t,d])=>{const g=items.filter(x=>x.k>=a&&x.k<=b);if(!g.length)return "";
-    return `<section class="era"><h3>${t} <span class="small muted">${g.length} 筆</span></h3>${f==="all"&&!c?`<p>${d}</p>`:""}<ol class="tl">${g.map(row).join("")}</ol></section>`}).join("");
-  $("#panel").innerHTML=`<h2>新聞始末：大屯地熱的來龍去脈</h2>
-  <p class="muted small" style="margin-top:0">把歷史大事紀（${EVENTS.length} 筆）與 2023-11 到 2026-11 的新聞（${NEWS.length} 則）排成一條時間軸。實心點是大事紀，空心點是新聞。新聞摘要為改寫；標題標「自擬簡稱」的，請以連結頁面的原標題為準。</p>
+       <p class="hl">${esc(x.text)}</p><p class="meta">${x.mean&&x.mean!=="—"?`意義：${esc(x.mean)}｜`:""}來源 ${links(x.src)}</p></div></li>`;
+  const eraT=t=>{const m=t.replace(/^[一二三四五六七八九十]+、/,"").match(/^(.*?)（(.*)）$/);return m?[m[1],m[2]]:[t,""]};
+  const body=[...ERAS].reverse().map(([a,b,t,d])=>{const g=items.filter(x=>x.k>=a&&x.k<=b);if(!g.length)return "";const [tt,yr]=eraT(t);
+    return `<section class="era"><h3><span class="yr">${yr}</span>${tt} <span class="small muted" style="font-weight:400">${g.length} 筆</span></h3>${f==="all"&&!c?`<p>${d}</p>`:""}<ol class="tl">${g.map(row).join("")}</ol></section>`}).join("");
+  $("#panel").innerHTML=`<h2 class="nh2">新聞始末：<em>大屯地熱的來龍去脈</em></h2>
+  <ul class="keys">${[...ERAS].reverse().map(([,,t])=>{const [tt,yr]=eraT(t);return `<li><b>${yr}</b>${tt}</li>`}).join("")}</ul>
+  <p class="muted small" style="margin-top:0">由新到舊排列：最上面是最近的發展，往下捲是更早的歷史。把歷史大事紀（${EVENTS.length} 筆）與 2023-11 到 2026-11 的新聞（${NEWS.length} 則）排成一條時間軸。實心點是大事紀，空心點是新聞。新聞摘要為改寫；標題標「自擬簡稱」的，請以連結頁面的原標題為準。</p>
   ${seg("nf",f,[["all","全部始末"],["news","只看新聞"],["event","只看大事紀"],["stage",`與「${st.name}」有關的新聞`]])}
   ${seg("nc",c,[["","所有類型"],...cats.map(x=>[x,x])])}
   <p class="small muted" style="margin:0">共 ${items.length} 筆</p>
