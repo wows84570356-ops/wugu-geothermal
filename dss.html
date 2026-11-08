@@ -511,9 +511,8 @@ function pNews(){
   const eraT=t=>{const m=t.replace(/^[一二三四五六七八九十]+、/,"").match(/^(.*?)（(.*)）$/);return m?[m[1],m[2]]:[t,""]};
   const body=[...ERAS].reverse().map(([a,b,t,d])=>{const g=items.filter(x=>x.k>=a&&x.k<=b);if(!g.length)return "";const [tt,yr]=eraT(t);
     return {yr,n:g.length,h:`<section class="era"><h3><span class="yr">${yr}</span>${tt} <span class="small muted" style="font-weight:400">${g.length} 筆</span></h3>${f==="all"&&!c?`<p>${d}</p>`:""}<ol class="tl">${g.map(row).join("")}</ol></section>`}}).filter(Boolean);
-  const more=S.nall?"":body.slice(1).map(x=>x.yr).filter(Boolean);
-  const shown=(S.nall?body:body.slice(0,1)).map(x=>x.h).join("");
-  const tgl=body.length>1?`<p style="margin:12px 0 0"><button type="button" class="btn ghost" data-act="nall">${S.nall?"收合，只看最新時期":`展開更早的歷史（${body[1].yr} 以前，共 ${body.slice(1).reduce((t,x)=>t+x.n,0)} 筆）`}</button></p>`:"";
+  const shown=body.map(x=>x.h).join("");
+  const tgl="";
   $("#newsTop").innerHTML=`<h2 class="nh2">新聞始末：<em>大屯地熱的來龍去脈</em></h2>
   <ul class="keys">${[...ERAS].reverse().map(([,,t])=>{const [tt,yr]=eraT(t);return `<li><b>${yr}</b>${tt}</li>`}).join("")}</ul>
   <p class="muted small" style="margin-top:0">由新到舊排列：最上面是最近的發展，往下捲是更早的歷史。把歷史大事紀（${EVENTS.length} 筆）與 2023-11 到 2026-11 的新聞（${NEWS.length} 則）排成一條時間軸。實心點是大事紀，空心點是新聞。新聞摘要為改寫；標題標「自擬簡稱」的，請以連結頁面的原標題為準。</p>
