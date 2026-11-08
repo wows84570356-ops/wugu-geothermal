@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>霧谷數據系統連線</title>
+<title>大屯地熱數據系統連線</title>
 <style>
 :root{--bg:#EDF0EB;--surface:#FAFBF8;--ink:#1C2420;--muted:#56635B;--line:#C9D1CA;--deep:#244A3D;--sulfur-bg:#F6EBC4;
   --f-display:"LXGW WenKai TC","Kaiti TC","DFKai-SB",serif;--f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
@@ -39,7 +39,7 @@ ol{padding-left:1.3em;margin:10px 0 0}
 <body>
 <div class="strata"></div>
 <div class="wrap">
-  <h1>霧谷數據系統</h1>
+  <h1>大屯地熱數據系統</h1>
   <p class="hint noprint">上課時把這一頁投影出來，學生用手機相機掃描下面的 QR code 就能進入系統。</p>
 
   <section class="hero" id="hero">
@@ -66,10 +66,10 @@ ol{padding-left:1.3em;margin:10px 0 0}
 </div>
 <script src="qrcode.min.js"></script>
 <script>
-const CARDS=[["A","蒸氣停不下來，山林被燙傷"],["B","溫泉水位突然少了 9.5 公尺"],["C","簽到不等於同意"],["D","受影響的人都到場了嗎？"],
- ["E","蒸氣、噪音和異味傳到山下"],["F","四千公尺，答案還沒出來"],["G","地下兩千公尺，岩芯出土"],["H","很熱，卻把井管吃壞了"],
- ["I","地底頻繁微震，民宅牆面龜裂"],["J","硫化氫超標，村民頭暈送醫"],["K","部落要求入股，也要共同決定"],["L","工程道路靠近文化地景"],
- ["M","碳酸鈣堵塞井管，流量暴跌"],["N","四十年舊井，套管鏽蝕成蜂窩"],["O","附近的間歇泉越來越安靜"],["P","熔岩逼近地熱電廠"]];
+const CARDS=[["A","最好的熱，都在國家公園裡"],["B","硫磺子坪動土，居民擔心地下水"],["C","不是原住民族地區，就沒有原住民議題嗎？"],["D","受影響的人有誰？"],
+ ["E","鑽井 24 小時，夜間只准 47 分貝"],["F","四千公尺，溫度還是不夠"],["G","馬槽探勘井，245°C"],["H","酸到會吃掉井管"],
+ ["I","活火山旁鑽井：每月 150 次微震"],["J","硫化氫：聞不到才危險"],["K","回饋怎麼分？"],["L","北投社與金包里：文化地景"],
+ ["M","馬槽遊憩區：一半是危險地"],["N","萬里鑽孔，噴出 3 公尺溫泉"],["O","5 MW 是一條分界線"],["P","火山燈號轉黃，要不要停鑽？"]];
 function qrImg(text,cell){const q=qrcode(0,"M");q.addData(text);q.make();return q.createImgTag(cell,cell*2)}
 function draw(base){
   document.getElementById("url").textContent=base;
