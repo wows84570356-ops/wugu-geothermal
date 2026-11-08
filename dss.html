@@ -140,6 +140,7 @@ h3{font-size:16px;margin:0 0 6px}
 .era{margin:26px 0 4px}
 .era h3{font-size:19px;margin:0;padding:4px 0 4px 10px;border-left:5px solid var(--accent);line-height:1.4}
 .era h3 .yr{display:inline-block;font-size:12.5px;font-weight:600;background:var(--accent);color:#fff;border-radius:4px;padding:0 7px;margin-right:8px;vertical-align:2px}
+.newstop{margin:0 0 14px;padding:14px 16px}
 .nh2{font-size:24px;margin:0 0 2px;line-height:1.35}
 .nh2 em{font-style:normal;color:var(--accent)}
 .keys{list-style:none;margin:10px 0 6px;padding:10px 12px;background:var(--accent-bg);border-radius:8px;display:grid;gap:4px}
@@ -383,6 +384,7 @@ function render(){
   if(!S.role)return renderPick();
   const r=ROLES[S.role],st=STAGES[S.stage];
   $("#app").innerHTML=`
+  <section id="newsTop" class="card newstop"></section>
   <div class="case"><h1>大屯地熱開發教學案 <span class="tag">教學案</span></h1><span class="muted small">地點：大屯火山群（金山、萬里、北投一帶）｜資料截至 2026-11-08</span></div>
   <p class="muted small" style="margin:0">案場是教學設定；因子裡的數據都是大屯一帶的真實公開資料，標有來源代碼。標「未公開」「待補」的，是查不到公開資料的項目。</p>
   <details class="card" style="margin-top:10px;padding:8px 14px"><summary><b>大屯實際案場與全國裝置容量</b> <span class="small muted">（點開）</span></summary>
@@ -400,13 +402,15 @@ function render(){
     <p class="small muted" style="margin:6px 0">大屯目前唯一有公開紀錄的探勘階段環境事故。政府自己是開發方（地礦中心），井位在國家公園內。噪音分貝、硫化氫數值、蒸氣流量都沒有公開。</p>
     <div class="ops">${MACHAO.map(x=>`<div class="op" style="--rc:var(--bad)"><p><b>${esc(x[0])}</b>　${esc(x[1])} <span class="src">${links(x[2])}</span></p></div>`).join("")}</div>
     <p class="small" style="margin:8px 0 0">討論：如果這一階段的文件與門檻當初都有做到，哪一項最可能避免或減輕這個事件？</p></details>`:""}
-  <div class="tabs" role="tablist">${[["docs","文件"],["factors","因子與數據"],["rules","門檻檢核"],["ops","意見"],["review","審查與許可"],["news","新聞始末"]].map(([k,l])=>{
-    const mine={docs:can("docs"),factors:can("weights"),rules:can("rules"),ops:can("opinion"),review:can("review")||can("score")||can("permit"),news:false}[k];
+  <div class="tabs" role="tablist">${[["docs","文件"],["factors","因子與數據"],["rules","門檻檢核"],["ops","意見"],["review","審查與許可"]].map(([k,l])=>{
+    const mine={docs:can("docs"),factors:can("weights"),rules:can("rules"),ops:can("opinion"),review:can("review")||can("score")||can("permit")}[k];
     return `<button type="button" class="tab" role="tab" aria-selected="${S.tab===k}" data-tab="${k}" style="--rc:${r.c}">${l}${mine?'<span class="dot" title="你可以在這裡操作"></span>':""}</button>`}).join("")}</div>
   <section id="panel"></section>
   <p class="note">資料整理自政府公告、法規、司法判決、學術研究與新聞報導（資料蒐集截止 2026-11-08）。法規門檻會修正，實際標準以全國法規資料庫與主管機關最新公告為準。你在這裡填的內容只存在這台裝置的瀏覽器，不會上傳；要交給別人，請用「審查與許可」裡的「複製本階段摘要」。本平台參照「環境影響評估模擬試辦協作平台」的架構簡化而成，為教學用，不構成法律、投資或工程建議。
   <button type="button" class="btn ghost" data-act="reset" style="margin-left:6px;padding:2px 10px;font-size:12.5px">清除所有填寫內容</button></p>`;
-  ({docs:pDocs,factors:pFactors,rules:pRules,ops:pOps,review:pReview,news:pNews})[S.tab]();
+  if(S.tab==="news")S.tab="docs";
+  pNews();
+  ({docs:pDocs,factors:pFactors,rules:pRules,ops:pOps,review:pReview})[S.tab]();
 }
 function renderPick(){
   $("#app").innerHTML=`<h1>選擇你的角色</h1>
@@ -506,14 +510,17 @@ function pNews(){
        <p class="hl">${esc(x.text)}</p><p class="meta">${x.mean&&x.mean!=="—"?`意義：${esc(x.mean)}｜`:""}來源 ${links(x.src)}</p></div></li>`;
   const eraT=t=>{const m=t.replace(/^[一二三四五六七八九十]+、/,"").match(/^(.*?)（(.*)）$/);return m?[m[1],m[2]]:[t,""]};
   const body=[...ERAS].reverse().map(([a,b,t,d])=>{const g=items.filter(x=>x.k>=a&&x.k<=b);if(!g.length)return "";const [tt,yr]=eraT(t);
-    return `<section class="era"><h3><span class="yr">${yr}</span>${tt} <span class="small muted" style="font-weight:400">${g.length} 筆</span></h3>${f==="all"&&!c?`<p>${d}</p>`:""}<ol class="tl">${g.map(row).join("")}</ol></section>`}).join("");
-  $("#panel").innerHTML=`<h2 class="nh2">新聞始末：<em>大屯地熱的來龍去脈</em></h2>
+    return {yr,n:g.length,h:`<section class="era"><h3><span class="yr">${yr}</span>${tt} <span class="small muted" style="font-weight:400">${g.length} 筆</span></h3>${f==="all"&&!c?`<p>${d}</p>`:""}<ol class="tl">${g.map(row).join("")}</ol></section>`}}).filter(Boolean);
+  const more=S.nall?"":body.slice(1).map(x=>x.yr).filter(Boolean);
+  const shown=(S.nall?body:body.slice(0,1)).map(x=>x.h).join("");
+  const tgl=body.length>1?`<p style="margin:12px 0 0"><button type="button" class="btn ghost" data-act="nall">${S.nall?"收合，只看最新時期":`展開更早的歷史（${body[1].yr} 以前，共 ${body.slice(1).reduce((t,x)=>t+x.n,0)} 筆）`}</button></p>`:"";
+  $("#newsTop").innerHTML=`<h2 class="nh2">新聞始末：<em>大屯地熱的來龍去脈</em></h2>
   <ul class="keys">${[...ERAS].reverse().map(([,,t])=>{const [tt,yr]=eraT(t);return `<li><b>${yr}</b>${tt}</li>`}).join("")}</ul>
   <p class="muted small" style="margin-top:0">由新到舊排列：最上面是最近的發展，往下捲是更早的歷史。把歷史大事紀（${EVENTS.length} 筆）與 2023-11 到 2026-11 的新聞（${NEWS.length} 則）排成一條時間軸。實心點是大事紀，空心點是新聞。新聞摘要為改寫；標題標「自擬簡稱」的，請以連結頁面的原標題為準。</p>
   ${seg("nf",f,[["all","全部始末"],["news","只看新聞"],["event","只看大事紀"],["stage",`與「${st.name}」有關的新聞`]])}
   ${seg("nc",c,[["","所有類型"],...cats.map(x=>[x,x])])}
   <p class="small muted" style="margin:0">共 ${items.length} 筆</p>
-  ${body||`<p class="muted">沒有符合條件的項目。</p>`}
+  ${shown||`<p class="muted">沒有符合條件的項目。</p>`}${tgl}
   <p class="small" style="margin-top:14px">討論：從這條時間軸看，哪幾個轉折點如果當時有更完整的資訊公開或地方溝通，後來的爭議可能會比較小？</p>`;
 }
 function summary(){
@@ -537,6 +544,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.nf!==undefined){S.nf=b.dataset.nf;save();render();return}
   if(b.dataset.nc!==undefined){S.nc=b.dataset.nc;save();render();return}
   const a=b.dataset.act;
+  if(a==="nall"){S.nall=!S.nall;save();render();return}
   if(a==="switch"){S.role=null;save();render();return}
   if(a==="reset"){if(confirm("確定要清除這台裝置上所有的填寫內容嗎？")){const r=S.role;S=blank();S.role=r;save();render()}return}
   if(a==="saveReview"){S.review[S.stage]=$("#rv").value;save();render();return}
