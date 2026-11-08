@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>大屯地熱決策平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：參照原平台的四階段平行四邊形，其餘簡化成「選角色 → 選階段 → 五個分頁」。 */
+:root{
+  --bg:#F3F4F2; --surface:#FFFFFF; --sunk:#E8EBE8; --ink:#1D2724; --muted:#5A6762; --line:#D3D9D5;
+  --bar:#1C3A44; --bar-ink:#F3F6F5; --accent:#2B7A8C; --accent-bg:#DDEEF1;
+  --ok:#1E7B3A; --ok-bg:#DFF1E3; --warn:#8A5A00; --warn-bg:#FBEFD2; --bad:#B23A30; --bad-bg:#F8E0DD; --na:#5A6762; --na-bg:#ECEEEC;
+  --f:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121816; --surface:#1A2220; --sunk:#151C1A; --ink:#E4EAE7; --muted:#9DABA5; --line:#2E3A36;
+  --bar:#0F2229; --bar-ink:#E4EAE7; --accent:#6CC0D1; --accent-bg:#17343B;
+  --ok:#6FCF8A; --ok-bg:#16301E; --warn:#E8B95A; --warn-bg:#352A12; --bad:#F08A80; --bad-bg:#3A1C19; --na:#9DABA5; --na-bg:#202826;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121816; --surface:#1A2220; --sunk:#151C1A; --ink:#E4EAE7; --muted:#9DABA5; --line:#2E3A36;
+  --bar:#0F2229; --bar-ink:#E4EAE7; --accent:#6CC0D1; --accent-bg:#17343B;
+  --ok:#6FCF8A; --ok-bg:#16301E; --warn:#E8B95A; --warn-bg:#352A12; --bad:#F08A80; --bad-bg:#3A1C19; --na:#9DABA5; --na-bg:#202826;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.7}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{background:var(--bar);color:var(--bar-ink)}
+.top .in{max-width:1120px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.top b{font-size:18px;letter-spacing:.04em}
+.top .who{display:flex;gap:8px;align-items:center;font-size:14px}
+.top button{background:transparent;border:1px solid rgba(255,255,255,.5);color:var(--bar-ink);border-radius:6px;padding:3px 12px;cursor:pointer}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 16px 56px}
+h1{font-size:clamp(22px,3.4vw,30px);margin:0;line-height:1.3}
+h2{font-size:20px;margin:0 0 8px}
+h3{font-size:16px;margin:0 0 6px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.case{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;margin-bottom:6px}
+.tag{display:inline-block;font-size:12px;border-radius:4px;padding:1px 8px;background:var(--accent);color:#fff;vertical-align:middle}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+
+/* 選角色 */
+.roles{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
+.role{display:grid;grid-template-columns:44px 1fr;gap:12px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer}
+.role:hover{border-color:var(--accent)}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;background:var(--rc)}
+.role b{display:block}
+.role span{font-size:13px;color:var(--muted);line-height:1.5}
+.role .av{color:#fff;font-size:18px;line-height:1}
+
+/* 四階段 */
+.stages{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:18px 0 6px}
+.stg{position:relative;border:0;background:transparent;padding:0;cursor:pointer;min-height:76px}
+.stg .shape{position:absolute;inset:0;background:var(--surface);border:1px solid var(--line);transform:skewX(-14deg);border-radius:4px}
+.stg[aria-current="step"] .shape{background:var(--accent-bg);border-color:var(--accent);border-width:2px}
+.stg .lab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:8px 14px;text-align:center}
+.stg .lab b{font-size:15px;line-height:1.3}
+.stg .lab small{font-size:12px;color:var(--muted)}
+@media (max-width:640px){.stages{grid-template-columns:repeat(2,minmax(0,1fr))}.stg .shape{transform:none}}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:999px;padding:0 8px;white-space:nowrap}
+.c-ok{background:var(--ok-bg);color:var(--ok)}.c-warn{background:var(--warn-bg);color:var(--warn)}.c-bad{background:var(--bad-bg);color:var(--bad)}.c-na{background:var(--na-bg);color:var(--na)}
+
+/* 我的任務 */
+.task{border-left:5px solid var(--rc);margin:14px 0}
+.task p{margin:2px 0 0}
+
+/* 分頁 */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:18px 0 16px;overflow-x:auto;scrollbar-width:none}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px;color:var(--muted);cursor:pointer;white-space:nowrap;font-weight:500;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--rc);margin-left:5px;vertical-align:middle}
+
+/* 文件 */
+.docs{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.doc{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px 10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.doc input{width:18px;height:18px;margin-top:4px;accent-color:var(--accent)}
+.doc p{margin:0}
+.doc .why{font-size:13px;color:var(--muted)}
+.progress{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden;margin:6px 0 14px}
+.progress i{display:block;height:100%;background:var(--accent)}
+
+/* 因子 */
+.factors{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.fac{display:flex;flex-direction:column;gap:6px}
+.fac.focus{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.fac .hd{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.fac table{border-collapse:collapse;width:100%;font-size:13.5px}
+.fac td{padding:4px 0;border-top:1px solid var(--line);vertical-align:top}
+.fac td:first-child{color:var(--muted);padding-right:10px;width:42%}
+.fac td b{font-weight:700}
+.src{font-size:11.5px;color:var(--muted)}
+.src a{color:inherit}
+.lim{font-size:13px;background:var(--sunk);border-radius:6px;padding:6px 10px;margin:0}
+.wt{display:flex;align-items:center;gap:8px;font-size:13px}
+.wt input{width:64px;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+
+/* 門檻 */
+.rules{display:flex;flex-direction:column;gap:10px}
+.rule{display:grid;grid-template-columns:52px minmax(0,1fr) 150px;gap:10px;align-items:start}
+@media (max-width:640px){.rule{grid-template-columns:44px minmax(0,1fr)}.rule select{grid-column:2}}
+.rule .id{font-weight:700;font-size:18px;color:var(--accent)}
+.rule p{margin:0}
+.rule select,.f select,.f textarea,.f input[type=number]{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:5px 8px}
+.nature{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--muted);white-space:nowrap}
+
+/* 意見、評分、審查 */
+.f{display:flex;flex-direction:column;gap:10px}
+.f label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.f textarea{min-height:76px;resize:vertical}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;align-self:flex-start}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.ops{display:flex;flex-direction:column;gap:8px}
+.op{border-left:4px solid var(--rc);padding:6px 0 6px 12px;background:var(--surface);border-radius:0 8px 8px 0}
+.op p{margin:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.scoretbl{width:100%;border-collapse:collapse;font-size:14px}
+.scoretbl th,.scoretbl td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+.scoretbl th{font-size:12.5px;color:var(--muted);font-weight:500}
+.scoretbl input{width:70px;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.big{font-size:34px;font-weight:700;line-height:1.1}
+.note{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);margin-top:36px;padding-top:12px}
+.chart svg{display:block;width:100%;height:auto}
+.chart .ax{fill:var(--muted);font-size:10.5px;font-family:var(--f)}
+.chart .vl{fill:var(--ink);font-size:11.5px;font-weight:700;font-family:var(--f)}
+.chart .hit{cursor:default}
+.charttip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:3px 8px;border-radius:4px;z-index:9;white-space:nowrap}
+.readonly{font-size:13px;color:var(--muted);background:var(--sunk);border-radius:6px;padding:6px 10px;margin:0 0 10px}
+
+/* 新聞始末 */
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.seg button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:2px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.era{margin:22px 0 4px}
+.era h3{font-size:16.5px;margin:0}
+.era p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.tl{list-style:none;margin:8px 0 0;padding:0 0 0 14px;border-left:2px solid var(--line)}
+.ti{position:relative;display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 12px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.ti::before{content:"";position:absolute;left:-20px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.ti.ev::before{background:var(--accent)}
+.ti .dt{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ti p{margin:0}
+.ti .meta{font-size:12.5px;color:var(--muted)}
+.kind{font-size:11.5px;border-radius:4px;padding:0 6px;margin-right:6px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.ti.ev .kind{background:var(--accent-bg);border-color:var(--accent);color:var(--ink)}
+@media (max-width:640px){.ti{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><b>大屯地熱決策平台</b><span class="who" id="who"></span></div></header>
+<main class="wrap" id="app"></main>
+
+<script>
+/* ============ 資料（依 yangmingshan-geothermal-decision-reference.md v1.1，資料蒐集截止 2026-11-08） ============ */
+const SRC={
+ S01:["陽管處《永續草山保育前瞻》簡報（2026-02-26）","官方","https://www.taiwan.nps.gov.tw/upload/file/2026-02-26/55126cfa-cf8c-4dc7-beb3-103838142277/永續草山保育前瞻簡報.pdf"],
+ S02:["國家公園經營管理統計（105 年底）","官方","https://www.nlma.gov.tw/uploads/files/9aeb3ad96ffcb55d65e0bfc65f6d29bf.pdf"],
+ S03b:["國家公園法","官方","https://law.moj.gov.tw/LawClass/LawAll.aspx?PCode=D0070105"],
+ S04:["最高行政法院 113 年度上字第 118 號判決（2026-01-08）","官方","https://judgment.judicial.gov.tw/FILES/TPAA/113%2c%e4%b8%8a%2c118%2c20260108%2c1.pdf"],
+ S05:["工研院〈大屯山地熱及地物技術〉（2015）","學術","https://www.gep.ncu.edu.tw/storage/speech/93/大屯山地熱及地物技術_20150508.pdf"],
+ S06:["台大 Play Fairway 大屯火山群地熱潛能研究","學術","https://tdr.lib.ntu.edu.tw/handle/123456789/2306"],
+ S13:["NOWnews〈大屯山四磺子坪先導廠〉","媒體／業者","https://www.nownews.com/news/6603956"],
+ S14:["TVBS〈會發電的山〉2025-04-20","媒體","https://news.tvbs.com.tw/life/2845520"],
+ S16:["工商時報：硫磺子坪動土 居民憂地下水量（2023-12-08）","媒體","https://www.ctee.com.tw/news/20231208701338-430104"],
+ S17:["工商時報：再生能源發展條例地熱專章（2023-12-08）","媒體","https://www.ctee.com.tw/news/20231208701342-430104"],
+ S18:["地熱能探勘與開發許可及管理辦法（2024-05-13）","官方","https://6laws.net/6law/law3/地熱能探勘與開發許可及管理辦法.htm"],
+ S19:["科技新報：地熱子法完善申設法規（2024-06-04）","媒體","https://technews.tw/?p=1236755"],
+ S20:["聯合新聞網／中央社：經部3箭助地熱發電（2026-03-22）","媒體","https://udn.com/news/story/7241/9395860"],
+ S23:["地礦中心：五大潛力區探勘成果（2025-08-28）","官方","https://wantrich.chinatimes.com/news/20250828900016-420501"],
+ S26:["台電 115 年度再生能源躉購費率","官方","https://branch.taipower.com.tw/files/file_pool/1/0Q135380953829401912/%285%29115%E5%B9%B4%E5%86%8D%E7%94%9F%E8%83%BD%E6%BA%90%E8%BA%89%E8%B3%BC%E8%B2%BB%E7%8E%87%E8%A8%88%E7%AE%97%E5%85%AC%E5%BC%8F.pdf"],
+ S29:["新北市環保局：營建工程噪音管制標準值","官方","https://pollution.epd.ntpc.gov.tw/dl/p3_o/112/1120223_1.pdf"],
+ S30:["噪音管制標準（工廠(場)）","官方","https://6laws.net/6law/law3/噪音管制標準.htm"],
+ S31:["職安署《職業性硫化氫中毒認定參考指引》","官方","https://www.oma.org.tw/upload/download_sections/17044413864.職業性硫化氫中毒認定參考指引.pdf"],
+ S32:["日本 NEDO 地熱電廠 H₂S 監測資料","學術","https://www.nedo.go.jp/content/800067977.pdf"],
+ S33:["民報：清洗溫泉池硫化氫中毒事件","媒體","https://www.peoplenews.tw/?p=3092"],
+ S34:["TVBS：大屯火山和龜山島都是活火山（2019-05-29）","學術／媒體","https://news.tvbs.com.tw/life/1140610"],
+ S36:["中研院：大屯岩漿庫地下約 8 km","學術","https://news.cnyes.com/news/id/4774026"],
+ S39:["公視：火山噴發訊息燈號","官方","https://news.pts.org.tw/article/485797"],
+ S40:["自由時報：環境部預告地熱環評門檻（2024-06-28）","官方（預告）","https://news.ltn.com.tw/news/politics/breakingnews/4719524"],
+ S45:["監察院調查報告（地熱推動目標）","官方","https://cybsbox.cy.gov.tw/CYBSBoxSSL/edoc/download/54798"],
+ S48:["風傳媒：豐宇綠能打造活火山地熱電廠","媒體／業者","https://www.storm.mg/lifestyle/5104737"],
+ S62:["新頭殼：學術地表調查無需探勘許可（2024-06-03）","媒體","https://newtalk.tw/news/view/2024-06-03/922361"],
+ S67:["文化部國家文化記憶庫〈北投的硫磺礦業〉","官方","https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Event&id=328763"],
+ S69:["中央社：平埔族身分法三讀（2025-10-17）","媒體","https://www.cna.com.tw/news/aipl/202510170188.aspx"],
+ S70:["原住民族地區清單（新北 1 處、臺北 0 處）","其他","https://en.wikipedia-on-ipfs.org/wiki/Indigenous_Area_(Taiwan)"],
+ S81:["地礦中心〈大屯火山區馬槽案場〉簡報（2024-12-17）","官方","https://geotex.geologycloud.tw/main/files/662311dfbd5fbc81571dc792b1190448.pdf"],
+ S82:["臺北市產業發展局 臺北溫泉主題網〈探勘地熱新能源〉","官方","https://hotspringflower.gov.taipei/cp.aspx?n=FDFB9B5AFA4EA793"],
+ S83:["聯合報／倡議家：地熱雙面刃，高溫蒸氣波及生態（2025-06-24）","媒體","https://ubrand.udn.com/ubrand/story/123661/8819885"],
+ S84:["東森美洲：3.5 公里外居民控異味噪音（2024-12-18）","媒體","https://www.ettvamerica.com/News/Article?i=298530"],
+ S85:["立法院經濟委員會質詢影片（2025-03-24）","媒體","https://www.youtube.com/watch?v=M-65bKJSfQE"],
+ S86:["自由時報：地礦中心公開地熱資料庫（2026-05-06）","媒體","https://ec.ltn.com.tw/article/breakingnews/5428079"],
+ S88:["科技大觀園：介紹金山地熱能（2018-03-02）","學術","https://scitechvista.nat.gov.tw/Article/C000003/detail?ID=cfae4c24-630c-4697-b1fe-ae633980a359"],
+ S90:["新北市政府市政新聞：四磺子坪商轉（2023-10-03）","官方","https://www.ntpc.gov.tw/ch/home.jsp?id=e8ca970cde5c00e1&dataserno=8d8e5a86f880cb896ff27e79120d6784"],
+ S91:["中央社：金山硫磺子坪開發地熱發電（2022-07-05）","媒體","https://www.cna.com.tw/news/ahel/202207050388.aspx"],
+ S93:["聯合新聞網：進能服攜 ORMAT 建金山地熱電廠（2026-02）","媒體","https://udn.com/news/story/7240/9317738"],
+ S95:["環境資訊中心：2025 能源統計","媒體","https://e-info.org.tw/node/243176"],
+ S111:["經濟部能源署《能源統計手冊 2023》（容量 p.059–069、發電量 p.045–055）","官方",""],
+ S99:["大屯火山地區火山氣體連續觀測資料（16797）","官方","https://scidm.nchc.org.tw/en/dataset/best_wish16797"],
+ S103:["水利署〈地下水水位觀測井井況〉（data.gov.tw 32718，2026-11-08 下載，共 1,006 口）","官方","https://data.gov.tw/dataset/32718"],
+ S104:["新北市噪音管制區劃定範圍（2023-07-18 生效）","官方","https://data.ntpc.gov.tw/api/datasets/17a0b082-f9e1-41de-a9d1-a2f04ede915f/csv/file"],
+ S105:["臺北市噪音管制區分類及範圍（2025-12-08 實施）","官方","https://www.dep.gov.taipei/News_Content.aspx?n=0AADCAF4D1738405&s=A83E98C4076B7B56"],
+ S106:["大屯火山觀測站 地震觀測網頁","學術","https://tvo.ncree.narl.org.tw/decrypt/watch/earthquake"],
+ S108:["監察院調查報告（地熱推廣目標）","官方","https://cybsbox.cy.gov.tw/CYBSBoxSSL/edoc/download/58909"]
+};
+
+/* 大屯實際案場與事件（第二輪補充，v1.2 第 9 章） */
+const SITES=[
+ ["四磺子坪先導電廠","新北金山","1 MW（另一說 1.2 MW）","2023 年商轉；先導設備約 1,500 m²；年發電約 640 萬度；投入約 3 億元","S90"],
+ ["硫磺子坪示範區","新北金山","4–4.2 MW","施工中，預期 2027 上半年取得電業執照；開發面積近 2 萬 m²（約 2 公頃）","S91"],
+ ["進能服金山案","新北金山","12.5 MW","中低溫資源、ORMAT 機組；設備約 5.86 億元；預計 2027-12 商轉","S93"],
+ ["馬槽一號井","臺北北投（國家公園內）","政府探勘井","245°C @1,020 m；測試後失控噴氣約 3 個月，封井時井噴","S81、S83"]
+];
+const MACHAO=[
+ ["2024-11-14","光纖 DAS／DTS 初測","S81"],
+ ["2024-12-17","地礦中心論壇公開成果：245°C @1,020 m","S81"],
+ ["2024-12-18","3.5 km 外竹子湖、湖田里居民陳情 24 小時噪音與異味；北市環保局 10 m 內檢測只公布「無異常」，並認定非噪音管制對象","S84"],
+ ["2024 年底起","產能測試後井底壓力超過預期，無法立即停止，蒸氣與煙霧連續噴發約 3 個月","S83"],
+ ["2025-03-24","立法院經濟委員會質詢井噴與噪音（影片標題稱硫化氫超標 9 倍，未見官方數據）","S85"],
+ ["2025-03 底","首次灌漿封井時發生井噴，蒸氣與水泥漿波及民宅與樹林","S83"],
+ ["2025-06-24","陽管處初步調查：約 3 公頃蕨類與灌叢多數死亡；將向地礦中心求償並長期監測","S83"]
+];
+/* 全國地熱年度資料（taiwan_geothermal_annual_2018_2024.csv）。null = 缺資料；2024 發電量為媒體引用 */
+const ANNUAL=[
+ {y:2018,cap:0.0,gen:0.0},{y:2019,cap:0.3,gen:0.8},{y:2020,cap:0.3,gen:1.9},{y:2021,cap:4.5,gen:9.1},
+ {y:2022,cap:5.4,gen:25.0},{y:2023,cap:7.3,gen:23.2},{y:2024,cap:null,gen:26.741,genNote:"媒體引用"}
+];
+const CAPACITY=[["2020 目標","150 MW","S108"],["2025 目標","200 → 下修 20 MW","S108、S45"],["2025 年底實際","約 7 MW","S95"],["2026-03 已併網","13.657 MW（口徑可能不同）","S20"],["2030 目標","200 MW","S19"]];
+
+/* 新聞始末：news_index_2023_2026.csv（44 則）＋ 參考資料庫 v1.3 第 4 章大事紀（與新聞重複者已併入新聞）。 */
+const NEWS=[{"k": "2023-11-20", "date": "2023-11-20", "media": "中央社", "title": "硫磺子坪電廠動土 鄭文燦：地熱能源是下階段重點", "own": false, "sum": "四磺子坪商轉典禮同日，硫磺子坪示範區動土；行政院表示地熱是下一階段能源重點", "cat": "開發案場", "sites": "四磺子坪、硫磺子坪", "roles": "中央官員、開發商、地方政府", "stg": [3], "sraw": "S6、S7", "rel": "直接", "url": "https://www.cna.com.tw/news/aloc/202311200270.aspx"}, {"k": "2023-11-20", "date": "2023-11-20", "media": "自由時報", "title": "全台最大地熱潛能區！金山硫磺子坪地熱示範區動土 2025商轉", "own": false, "sum": "硫磺子坪原訂 2025 商轉；全國地熱 9 處 24 案約 61.75 MW 申設中、已商轉約 7.29 MW", "cat": "開發案場", "sites": "硫磺子坪", "roles": "中央官員、開發商", "stg": [3], "sraw": "S6", "rel": "直接", "url": "https://news.ltn.com.tw/news/NewTaipei/breakingnews/4496182"}, {"k": "2023-12-04", "date": "2023-12-04", "media": "三立新聞", "title": "大屯火山活動釀北市規模2.4地震 氣象署：1現象恐代表火山活動異常", "own": false, "sum": "士林規模 2.4、深 3.4 km 極淺層地震；氣象署說大屯每天約 3–5 次小型火山地震，震源若變淺到 1–2 km 才需警覺", "cat": "火山與地震", "sites": "大屯火山", "roles": "學者、中央官員、居民", "stg": [0, 3], "sraw": "S0、S8", "rel": "相關", "url": "https://www.setn.com/News.aspx?NewsID=1392667"}, {"k": "2023-12-08", "date": "2023-12-08", "media": "工商時報", "title": "金山硫磺子坪地熱發電廠動土 居民憂影響地下水水量", "own": false, "sum": "金山居民擔心電廠影響地下水量；能源署回應法定回注至少 90%", "cat": "事故與爭議", "sites": "硫磺子坪", "roles": "居民、中央官員", "stg": [3], "sraw": "S5、S6", "rel": "直接", "url": "https://www.ctee.com.tw/news/20231208701338-430104"}, {"k": "2023-12-08", "date": "2023-12-08", "media": "工商時報", "title": "再生能源發展條例地熱專章 民團：法務部踩得太硬了", "own": false, "sum": "產業協會談地熱專章：水權 20 年、回注 90%、斜井越界缺免責條款等", "cat": "政策法規", "sites": "全國", "roles": "開發商、中央官員", "stg": [1, 3], "sraw": "S2、S5", "rel": "相關", "url": "https://www.ctee.com.tw/news/20231208701342-430104"}, {"k": "2023-12-22", "date": "2023-12-22", "media": "中央社", "title": "揭開火山神祕面紗 大屯火山觀測站強化監測預警", "own": false, "sum": "介紹大屯火山觀測站的監測項目與預警機制", "cat": "火山與地震", "sites": "大屯火山", "roles": "學者", "stg": [3], "sraw": "S8", "rel": "相關", "url": "https://www.cna.com.tw/news/ahel/202312220332.aspx"}, {"k": "2024-01-27", "date": "2024-01-27", "media": "中時新聞網（Yahoo 轉載）", "title": "2030蓋地熱電廠 中油、台電前進大屯山鑽探", "own": false, "sum": "中油已在大屯山鑽探、目標 2030 年前建 10 MW 以上電廠，但表示位於國家公園內須修法才能營運；台電規劃在焿子坪打探勘井；熱水 pH 約 2", "cat": "探勘調查", "sites": "大屯山、焿子坪", "roles": "開發商、中央官員", "stg": [0, 2], "sraw": "S3、S0", "rel": "直接", "url": "https://tw.news.yahoo.com/2030%E8%93%8B%E5%9C%B0%E7%86%B1%E9%9B%BB%E5%BB%A0-%E4%B8%AD%E6%B2%B9-%E5%8F%B0%E9%9B%BB%E5%89%8D%E9%80%B2%E5%A4%A7%E5%B1%AF%E5%B1%B1%E9%91%BD%E6%8E%A2-201000880.html"}, {"k": "2024-06-04", "date": "2024-06-04", "media": "科技新報", "title": "（地熱子法上路、申設程序說明）", "own": true, "sum": "地熱能探勘與開發許可及管理辦法等子法公布，說明聯審、說明會與目標", "cat": "政策法規", "sites": "全國", "roles": "中央官員、開發商", "stg": [1, 3], "sraw": "S2、S5", "rel": "相關", "url": "https://technews.tw/?p=1236755"}, {"k": "2024-06-28", "date": "2024-06-28", "media": "自由時報", "title": "（環境部預告環評認定標準修正，地熱門檻調整）", "own": true, "sum": "預告地熱環評門檻：一般區 5 萬瓩以上、部分敏感區 1 萬瓩或 2 公頃以上", "cat": "政策法規", "sites": "全國", "roles": "中央官員、環保團體", "stg": [3], "sraw": "S5", "rel": "相關", "url": "https://news.ltn.com.tw/news/politics/breakingnews/4719524"}, {"k": "2024-10-01", "date": "2024-10-01", "media": "台電新聞稿", "title": "台電今簽地熱MOU 打造地熱開發合作國際團隊", "own": false, "sum": "台電與台汽電、倍速羅得、GreenFire 合作，以大屯山為第一階段範圍，優先評估取熱不取水的先進系統", "cat": "開發案場", "sites": "大屯山", "roles": "開發商、中央官員", "stg": [0, 2], "sraw": "S1、S3", "rel": "直接", "url": "https://www.taipower.com.tw/2289/2323/2324/58725/normalPost"}, {"k": "2024-10-01", "date": "2024-10-01", "media": "自由財經", "title": "大屯山地熱潛能占全國20％ 台電率台汽電、國際團隊探勘研究", "own": false, "sum": "台電稱大屯火山群潛能約占全國 20%，一口探勘井成本近 1 億元", "cat": "開發案場", "sites": "大屯山", "roles": "開發商", "stg": [0, 2], "sraw": "S1、S3", "rel": "直接", "url": "https://ec.ltn.com.tw/article/breakingnews/4817290"}, {"k": "2024-10-01", "date": "2024-10-01", "media": "中央廣播電臺（Yahoo 轉載）", "title": "台電攜5業者組國際團隊 投入大屯山地熱開發前期鑽探", "own": false, "sum": "合作總經費約 2 億元，預計隔年 10 月完成地熱模型後才鑽探，有開發價值再成立合資公司", "cat": "開發案場", "sites": "大屯山", "roles": "開發商", "stg": [0, 2], "sraw": "S1、S4", "rel": "直接", "url": "https://tw.news.yahoo.com/%E5%8F%B0%E9%9B%BB%E6%94%9C5%E6%A5%AD%E8%80%85%E7%B5%84%E5%9C%8B%E9%9A%9B%E5%9C%98%E9%9A%8A-%E6%8A%95%E5%85%A5%E5%A4%A7%E5%B1%AF%E5%B1%B1%E5%9C%B0%E7%86%B1%E9%96%8B%E7%99%BC%E5%89%8D%E6%9C%9F%E9%91%BD%E6%8E%A2-094921023.html"}, {"k": "2024-10-24", "date": "2024-10-24", "media": "中央社", "title": "陽明山強降雨釀災 陽金公路過馬槽橋處土石滑落雙向封閉", "own": false, "sum": "馬槽一帶強降雨造成土石滑落、道路封閉（依標題；非地熱事件，但與馬槽地質災害敏感相關）", "cat": "火山與地震", "sites": "馬槽", "roles": "居民、國家公園管理", "stg": [0], "sraw": "S0", "rel": "相關", "url": "https://www.cna.com.tw/news/ahel/202410240228.aspx"}, {"k": "2024-11-28", "date": "2024-11-28", "media": "MoneyDJ（LINE TODAY 轉載）", "title": "台汽電再拓綠能潛力，地熱能年底初勘大屯山", "own": false, "sum": "台汽電規劃年底起做地質初勘與大地電磁測量，實際蘊藏量要第二階段試鑽才能確認", "cat": "探勘調查", "sites": "大屯山", "roles": "開發商", "stg": [0], "sraw": "S1", "rel": "直接", "url": "https://today.line.me/tw/v3/article/8nWJweK"}, {"k": "2024-11-29", "date": "2024-11-29", "media": "行政院（能源署簡報）", "title": "地熱能推動進度", "own": false, "sum": "全國已併網 7.49 MW、建置中 12.6 MW；列出 2026 年 500 MW 至 2030 年 3.4 GW 的累積目標；台電將引進國外團隊在四區同步作業", "cat": "政策法規", "sites": "四磺子坪、硫磺子坪、大屯山", "roles": "中央官員", "stg": [0], "sraw": "S0", "rel": "直接", "url": "https://www.ey.gov.tw/File/8F3921BFDD231ADC?A=C"}, {"k": "2024-12-06", "date": "2024-12-06", "media": "工商時報", "title": "挺台灣 結元能源估2029年地熱發電達34.55MW", "own": false, "sum": "結元稱硫磺子坪預計 2025 年底併聯，2029 年前總容量 34.55 MW；業者希望簡化土地與饋線程序", "cat": "開發案場", "sites": "四磺子坪、硫磺子坪", "roles": "開發商", "stg": [3], "sraw": "S6、S7", "rel": "直接", "url": "https://www.ctee.com.tw/news/20241206702006-431202"}, {"k": "2024-12-13", "date": "2024-12-13", "media": "工商時報", "title": "（地熱 2025 目標 20 MW、中央地方聯審）", "own": true, "sum": "2025 年目標 20 MW；聯審後地方審查由可能擱置半年縮短到約一個月可開會", "cat": "政策法規", "sites": "全國", "roles": "中央官員、地方政府", "stg": [1, 3], "sraw": "S2、S5", "rel": "相關", "url": "https://www.ctee.com.tw/news/20241213700042-430104"}, {"k": "2024-12-17", "date": "2024-12-17", "media": "經濟部（地礦中心新聞稿）", "title": "「地熱進行式論壇」全國地熱探勘實務成果全都露！", "own": false, "sum": "論壇逾 400 人；大屯火山群 245°C 為各場域最高；隔日帶隊參訪馬槽探勘井", "cat": "探勘調查", "sites": "馬槽", "roles": "中央官員、學者、開發商", "stg": [2], "sraw": "S3", "rel": "直接", "url": "https://www.moea.gov.tw/MNS/populace/news/News.aspx?kind=1&menu_id=40&news_id=118164"}, {"k": "2024-12-18", "date": "2024-12-18", "media": "東森美洲", "title": "獨家／陽明山地熱研究 直線範圍3.5公里外居民控異味噪音", "own": false, "sum": "竹子湖、湖田里居民陳情 24 小時噪音與異味；北市環保局檢測無異常並認定非噪音管制對象", "cat": "事故與爭議", "sites": "馬槽", "roles": "居民、地方政府、中央官員", "stg": [2], "sraw": "S3", "rel": "直接", "url": "https://www.ettvamerica.com/News/Article?i=298530"}, {"k": "2024-12-29", "date": "2024-12-29", "media": "新北市政府", "title": "金山地熱發電達200百萬瓦 侯友宜拚城市能源轉型", "own": false, "sum": "市長視察四磺子坪；金山萬里潛能 200 MW 以上；焿子坪 4.2 MW 探勘井階段、預計 2027 年完工", "cat": "開發案場", "sites": "四磺子坪、焿子坪", "roles": "地方政府、開發商", "stg": [2, 3], "sraw": "S3、S8", "rel": "直接", "url": "https://www.ntpc.gov.tw/ch/home.jsp?id=28&dataserno=202412290004"}, {"k": "2025-01-02", "date": "2025-01-02", "media": "科技新報", "title": "全國首座火山型地熱開發案，估計年發電量達 16 億度", "own": false, "sum": "轉述新北市府：金山萬里潛能 200 MW、年發電約 16 億度", "cat": "開發案場", "sites": "四磺子坪", "roles": "地方政府", "stg": [3], "sraw": "S8", "rel": "直接", "url": "https://technews.tw/2025/01/02/the-countrys-first-volcanic-geothermal-development-project/"}, {"k": "2025-03-24", "date": "2025-03-24", "media": "立法院經濟委員會（質詢影片）", "title": "【國昌質詢】陽明山國家公園探勘井噴 經濟部還要縱容廠商擺爛多久？", "own": false, "sum": "立委質詢陽明山探勘井井噴與噪音；影片標題稱硫化氫超標 9 倍（本次未見官方數據）", "cat": "事故與爭議", "sites": "馬槽", "roles": "立法委員、中央官員、居民", "stg": [2], "sraw": "S3", "rel": "直接", "url": "https://www.youtube.com/watch?v=E4BMRtSBDDA"}, {"k": "2025-04-00", "date": "2025-04", "media": "環境資訊中心", "title": "Google攜手倍速羅得 簽下台灣第一筆地熱購電協議", "own": false, "sum": "台灣首宗地熱企業購電協議，2029 年起供電 10 MW（未說明案場是否在大屯）", "cat": "市場與購電", "sites": "全國", "roles": "購電企業、開發商", "stg": [2], "sraw": "S4", "rel": "相關", "url": "https://e-info.org.tw/node/241131"}, {"k": "2025-04-20", "date": "2025-04-20", "media": "TVBS（再生能源資訊網轉載）", "title": "「會發電的山」揭密！ 台灣首座火山地熱電廠", "own": false, "sum": "走訪四磺子坪：氣冷機組、蒸汽約 110–120°C、出力約 1.1–1.2 MW", "cat": "開發案場", "sites": "四磺子坪", "roles": "開發商", "stg": [3], "sraw": "S8", "rel": "直接", "url": "https://ea02.moeaea.gov.tw/d0308/news/more.aspx?cid=198&id=7514"}, {"k": "2025-06-24", "date": "2025-06-24", "media": "聯合報", "title": "地熱雙面刃...難擋高溫蒸氣波及生態、原鄉權益衝突 制度缺口一一浮現", "own": false, "sum": "馬槽一號測試後蒸氣失控約 3 個月、封井時井噴，約 3 公頃植被受損，陽管處擬求償；並談原鄉諮商與制度缺口", "cat": "事故與爭議", "sites": "馬槽", "roles": "國家公園管理、中央官員、原住民族、居民", "stg": [2, 3], "sraw": "S3、S5", "rel": "直接", "url": "https://ubrand.udn.com/ubrand/story/123661/8819885"}, {"k": "2025-08-07", "date": "2025-08-07", "media": "ETtoday", "title": "「新北金山區」昨凌晨規模2.8地震 氣象署：大屯火山岩漿陷落", "own": false, "sum": "8/6 凌晨金山規模 2.8、深 4 km；氣象署說與岩漿冷卻陷落有關、監測穩定；小地震未自動發布", "cat": "火山與地震", "sites": "大屯火山、金山", "roles": "中央官員、居民", "stg": [0, 3], "sraw": "S0、S8", "rel": "相關", "url": "https://www.ettoday.net/news/20250807/3010680.htm"}, {"k": "2025-08-07", "date": "2025-08-07", "media": "公視", "title": "金山地震與大屯火山活動有關 專家：監測狀況穩定", "own": false, "sum": "同一起金山地震，專家說明監測穩定", "cat": "火山與地震", "sites": "大屯火山、金山", "roles": "學者", "stg": [3], "sraw": "S8", "rel": "相關", "url": "https://news.pts.org.tw/article/764597"}, {"k": "2025-08-28", "date": "2025-08-28", "media": "信傳媒", "title": "全台地熱潛能40GW 北宜花東5熱區就占八成 蘭陽溪探勘先行", "own": false, "sum": "地礦中心公布五大熱區；馬槽量到約 245°C；內政部研議修國家公園法，通過後大屯地熱區才可能開放", "cat": "探勘調查", "sites": "馬槽、大屯山", "roles": "中央官員", "stg": [0, 2], "sraw": "S0、S3", "rel": "直接", "url": "https://www.cmmedia.com.tw/home/articles/56473"}, {"k": "2025-08-29", "date": "2025-08-29", "media": "環境資訊中心", "title": "（立委提案修國家公園法禁設再生能源設備）", "own": true, "sum": "立委提案在國家公園法禁止設置再生能源設備", "cat": "政策法規", "sites": "國家公園", "roles": "立法委員、環保團體、國家公園管理", "stg": [0], "sraw": "S0", "rel": "相關", "url": "https://e-info.org.tw/node/242067"}, {"k": "2025-11-14", "date": "2025-11-14", "media": "公視我們的島", "title": "（光電三法三讀，國家公園法部分協商刪除）", "own": true, "sum": "光電相關修法三讀，國家公園法修正於協商中刪除；國家公園署表示依現行法不同意園區設光電", "cat": "政策法規", "sites": "國家公園", "roles": "立法委員、國家公園管理", "stg": [0], "sraw": "S0", "rel": "相關", "url": "https://ourisland.pts.org.tw/content/11762"}, {"k": "2025-12-15", "date": "2025-12-15", "media": "聯合新聞網（科學人）", "title": "科學人／同時擁有2種型態…地熱崛起 成台灣綠能新動力", "own": false, "sum": "回顧大屯探勘史（1965 年起、77 口探勘井與 4 口大口徑深井）；四磺子坪 2015 年鑽探評估約 5.5 MW；台電稱馬槽附近值得開發，但國家公園問題未解", "cat": "背景", "sites": "四磺子坪、硫磺子坪、馬槽", "roles": "學者、開發商", "stg": [0, 2], "sraw": "S0、S3", "rel": "直接", "url": "https://udn.com/news/story/6904/9181412"}, {"k": "2026-01-03", "date": "2026-01-03", "media": "工商時報", "title": "（115 年再生能源躉購費率公告）", "own": true, "sum": "地熱維持階梯式費率，新增次世代地熱 8.5522 元／度", "cat": "政策法規", "sites": "全國", "roles": "中央官員、開發商", "stg": [2], "sraw": "S4", "rel": "相關", "url": "https://www.ctee.com.tw/news/20260103700234-430503"}, {"k": "2026-01-31", "date": "2026-01-31", "media": "工商時報", "title": "（萬里加投公共浴池鑽探噴出溫泉）", "own": true, "sum": "萬里加投原址地質鑽探時鑽孔噴出溫泉，最高約 3 m，原因不明", "cat": "事故與爭議", "sites": "萬里", "roles": "居民、地方政府", "stg": [2], "sraw": "S3", "rel": "相關", "url": "https://www.ctee.com.tw/news/20260131700677-431401"}, {"k": "2026-02-00", "date": "2026-02", "media": "聯合新聞網", "title": "（進能服與 ORMAT 簽約建金山地熱電廠）", "own": true, "sum": "進能服金山案 12.5 MW、設備約 5.86 億元、預計 2027-12 商轉", "cat": "開發案場", "sites": "金山（進能服）", "roles": "開發商", "stg": [2, 3], "sraw": "S4、S6", "rel": "直接", "url": "https://udn.com/news/story/7240/9317738"}, {"k": "2026-03-22", "date": "2026-03-22", "media": "聯合新聞網／中央社", "title": "經部3箭助地熱發電 今年鎖定台東卑南鹿野招商遴選", "own": false, "sum": "經濟部說明地熱推動措施；台電大屯山案初步規劃先在國家公園外圍次佳區域開發；全國已併網 13.657 MW", "cat": "政策法規", "sites": "大屯山", "roles": "中央官員、開發商", "stg": [0, 2], "sraw": "S0、S4", "rel": "直接", "url": "https://udn.com/news/story/7241/9395860"}, {"k": "2026-03-26", "date": "2026-03-26", "media": "優分析", "title": "（地礦中心地熱探勘成果彙編）", "own": true, "sum": "地礦中心發布探勘成果彙編，大屯山列五大熱區之一", "cat": "探勘調查", "sites": "大屯山、馬槽", "roles": "中央官員", "stg": [0, 2], "sraw": "S1、S3", "rel": "直接", "url": "https://uanalyze.com.tw/articles/2847449677"}, {"k": "2026-04-28", "date": "2026-04-28", "media": "科技新報", "title": "（腳下的能源解方：一次看懂地熱發電）", "own": true, "sum": "整理全國案場與裝置容量（已商轉約 7.4 MW）及進能服金山案", "cat": "背景", "sites": "全國、金山（進能服）", "roles": "開發商", "stg": [0], "sraw": "S0", "rel": "相關", "url": "https://technews.tw/2026/04/28/geothermal-power-project/"}, {"k": "2026-05-00", "date": "2026-05", "media": "中央廣播電臺", "title": "經濟部共享地熱探勘成果 開發前期作業縮短至少3年", "own": false, "sum": "經濟部公開地熱探勘資料，稱可縮短開發前期作業至少 3 年", "cat": "探勘調查", "sites": "全國", "roles": "中央官員、開發商", "stg": [0], "sraw": "S1", "rel": "相關", "url": "https://rti.org.tw/news?pid=206886&uid=3"}, {"k": "2026-05-06", "date": "2026-05-06", "media": "自由時報", "title": "（地礦中心公開地熱資料庫）", "own": true, "sum": "資料庫涵蓋 10 區；大屯山高溫井 245°C、井深 1192 m", "cat": "探勘調查", "sites": "大屯山、馬槽", "roles": "中央官員、開發商", "stg": [0], "sraw": "S1", "rel": "直接", "url": "https://ec.ltn.com.tw/article/breakingnews/5428079"}, {"k": "2026-05-29", "date": "2026-05-29", "media": "民視", "title": "國家公園之冠！ 陽明山「全年人次破643萬」", "own": false, "sum": "陽明山年遊客人次超過 643 萬，居國家公園之冠（可更新遊客量指標）", "cat": "背景", "sites": "陽明山國家公園", "roles": "國家公園管理、遊客", "stg": [0], "sraw": "S0", "rel": "相關", "url": "https://www.ftvnews.com.tw/video/detail/KIJXQtjksoI"}, {"k": "2026-08-03", "date": "2026-08-03", "media": "中央社", "title": "（國家公園署規劃修國家公園法）", "own": true, "sum": "草擬設國家公園基金、生態保護區保育費、加重罰則；未見開放地熱的內容", "cat": "政策法規", "sites": "國家公園", "roles": "國家公園管理", "stg": [0], "sraw": "S0", "rel": "相關", "url": "https://www.cna.com.tw/news/aipl/202608030107.aspx"}, {"k": "2026-09-30", "date": "2026-09-30", "media": "科技新報", "title": "專訪》地熱從示範走向產業化，結元能源拚 2030 年開發 40 MW", "own": false, "sum": "結元稱硫磺子坪預期 2027 上半年取得電業執照，焿子坪 4.2 MW、四磺子坪二期 20 MW 預計 2030 年推進", "cat": "開發案場", "sites": "硫磺子坪、焿子坪、四磺子坪", "roles": "開發商", "stg": [3], "sraw": "S6、S7、S9", "rel": "直接", "url": "https://technews.tw/2026/09/30/exclusive-interview-tech-giants-enter-geothermal-market-jiyuan-energy-says-taiwan-industrialization-competition-just-beginning/"}, {"k": "2026-10-30", "date": "2026-10-30", "media": "蕃薯藤／中央社", "title": "（臺師大：從大屯火山認識火山的威力與恩惠）", "own": true, "sum": "學者說明淺層鑽探與岩漿活動不同，判斷異常前需先建立長期基線", "cat": "火山與地震", "sites": "大屯火山", "roles": "學者", "stg": [0, 3], "sraw": "S1、S8", "rel": "相關", "url": "https://n.yam.com/Article/20261030453167"}, {"k": "2026-11-04", "date": "2026-11-04", "media": "科技新報", "title": "台灣地熱資源潛力豐富，開發仍受地質與成本限制", "own": false, "sum": "大屯山屬五大高潛力區，但部分潛力區在國家公園內，須符合法規與審查，難直接轉成商業容量", "cat": "背景", "sites": "大屯山、馬槽", "roles": "開發商、國家公園管理", "stg": [0], "sraw": "S0", "rel": "直接", "url": "https://technews.tw/2026/11/04/taiwan-geothermal-potential-development-limited-geology-cost/"}];
+const EVENTS=[{"k": "1937-00-00", "date": "1937–1945", "id": "E01", "cat": "政策法規", "text": "日治時期設「大屯國立公園」，為陽明山國家公園前身", "mean": "保育歷史脈絡", "src": "S64"}, {"k": "1966-00-00", "date": "1966 起", "id": "E02", "cat": "探勘調查", "text": "政府開始在大屯火山進行地熱探勘調查", "mean": "開發史起點", "src": "S11、S49"}, {"k": "1970-00-00", "date": "1970 年代前後", "id": "E03", "cat": "探勘調查", "text": "因火山型地熱極酸、管線易腐蝕，當時技術無法克服，被認為不可行", "mean": "「腐蝕」成為歷史性技術瓶頸", "src": "S14、S11"}, {"k": "1985-09-00", "date": "1985-09", "id": "E04", "cat": "政策法規", "text": "陽明山國家公園公告實施（09-01）、管理處成立（09-16）", "mean": "大屯主要熱區被劃入國家公園", "src": "S02"}, {"k": "2011-00-00", "date": "2011", "id": "E05", "cat": "探勘調查", "text": "中研院於菁山自然中心設立大屯火山觀測站（TVO）", "mean": "火山監測資料來源", "src": "S34"}, {"k": "2012-00-00", "date": "2012（2015 簡報）", "id": "E06", "cat": "探勘調查", "text": "工研院估大屯火山發電潛能 514 MWe", "mean": "常被引用的潛能基準", "src": "S05"}, {"k": "2013-07-15", "date": "2013-07-15", "id": "E07", "cat": "政策法規", "text": "陽明山國家公園計畫第 3 次通盤檢討實施", "mean": "—", "src": "S02"}, {"k": "2016-00-00", "date": "2016–2017", "id": "E08", "cat": "火山與地震", "text": "中研院證實大屯火山群為活火山；2017-02 氣象局長表示不宜過度解讀", "mean": "科學認定存在討論", "src": "S36、S58"}, {"k": "2017-12-17", "date": "2017-12-17", "id": "E09", "cat": "開發案場", "text": "中油宣布重啟地熱研究，計畫隔年赴大屯山研究", "mean": "國營事業介入", "src": "S57"}, {"k": "2018-00-00", "date": "2018", "id": "E10", "cat": "開發案場", "text": "將捷集團入股結元能源", "mean": "民間開發主力出現", "src": "S12"}, {"k": "2019-05-27", "date": "2019-05-27", "id": "E11", "cat": "火山與地震", "text": "中研院記者會：大屯、龜山島為活火山，大油坑「火山心跳」", "mean": "火山風險意識上升", "src": "S34"}, {"k": "2020-07-00", "date": "2020-07", "id": "E12", "cat": "事故與爭議", "text": "陽明山 4 通期間爆發墓園業者疑行賄、企圖將約 7 公頃劃出國家公園的弊案疑雲（相關人員獲不起訴，監察院後續糾正陽管處）", "mean": "國家公園土地變更的治理風險", "src": "S46"}, {"k": "2020-12-00", "date": "2020-12", "id": "E13", "cat": "政策法規", "text": "交通部宣布 2021 年元旦起防災訊息新增「火山噴發訊息」", "mean": "預警機制", "src": "S38、S39"}, {"k": "2021-00-00", "date": "2021", "id": "E14", "cat": "探勘調查", "text": "《國家公園學報》刊出以日本國家公園地熱法規鬆綁看台灣的研究", "mean": "國家公園內開發的政策參考", "src": "S07"}, {"k": "2021-03-00", "date": "2021-03", "id": "E15", "cat": "火山與地震", "text": "研究發表大屯岩漿庫位於地下約 8 km", "mean": "地下結構資料", "src": "S36"}, {"k": "2022-04-15", "date": "2022-04-15", "id": "E16", "cat": "政策法規", "text": "陽明山 4 通生效：馬槽遊憩區西區改劃為第三種一般管制區及特別景觀區", "mean": "馬槽（高潛力區）土地分區改變", "src": "S04"}, {"k": "2022-06-27", "date": "2022-06-27", "id": "E17", "cat": "政策法規", "text": "經濟部成立「地熱發電單一服務窗口」", "mean": "行政程序整合", "src": "S54"}, {"k": "2023-02-17", "date": "2023-02-17", "id": "E18", "cat": "火山與地震", "text": "北投規模 3.1 地震，深度 4.8 km", "mean": "微震背景資料", "src": "S38"}, {"k": "2023-06-21", "date": "2023-06-21", "id": "E19", "cat": "政策法規", "text": "《再生能源發展條例》增訂地熱專章（回注 90%、水權 20 年、聯審、排除溫泉法程序）", "mean": "法規基礎", "src": "S17、S19"}, {"k": "2023-09-00", "date": "2023（9–11 月）", "id": "E20", "cat": "開發案場", "text": "四磺子坪先導電廠商轉，全台首座火山型地熱電廠", "mean": "證明酸性火山地熱可行", "src": "S09、S12、S13"}, {"k": "2024-05-13", "date": "2024-05-13", "id": "E23", "cat": "政策法規", "text": "公告《地熱能探勘與開發許可及管理辦法》", "mean": "申請程序明確化（500 m 規則、說明會）", "src": "S18、S19"}, {"k": "2024-12-00", "date": "2024-12", "id": "E26", "cat": "探勘調查", "text": "地礦中心地熱論壇（約 400 人），帶隊參訪馬槽探勘井與四磺子坪電廠", "mean": "馬槽探勘公開", "src": "S25"}, {"k": "2025-08-27", "date": "2025-08-27", "id": "E29", "cat": "探勘調查", "text": "地礦中心公布馬槽測得 245°C、產能測試表現佳", "mean": "園區內最高潛力點證實", "src": "S23"}, {"k": "2026-01-08", "date": "2026-01-08", "id": "E32", "cat": "事故與爭議", "text": "最高行政法院駁回馬槽遊憩區變更案上訴（業者主張信賴保護，未獲採納）", "mean": "分區變更的司法見解", "src": "S04"}, {"k": "2026-02-26", "date": "2026-02-26", "id": "E33", "cat": "政策法規", "text": "陽管處「永續草山保育前瞻」簡報：森林覆蓋約 80% 等最新數據", "mean": "環境基線", "src": "S01"}, {"k": "1600-00-00", "date": "17 世紀", "id": "E38", "cat": "政策法規", "text": "西班牙人、荷蘭人進入北投社，與凱達格蘭族進行硫磺貿易", "mean": "原住民族與大屯地熱資源的歷史連結", "src": "S67"}, {"k": "1887-00-00", "date": "1887", "id": "E39", "cat": "政策法規", "text": "清廷解除採硫禁令，設磺務總局並於北投設分局", "mean": "大屯資源由官方管制利用的先例", "src": "S67"}, {"k": "1985-00-00", "date": "1985", "id": "E40", "cat": "政策法規", "text": "陽明山國家公園成立後，基於生態保護公告禁止採硫，北投硫磺業走入歷史", "mean": "國家公園優先保育的先例", "src": "S67"}, {"k": "2020-10-00", "date": "2020-10", "id": "E41", "cat": "事故與爭議", "text": "（他區對照）花蓮紅葉部落上百人抗議地熱業者未經諮商就鑽探、夜間噪音擾民", "mean": "原住民族諮商與施工噪音", "src": "S71"}, {"k": "2025-05-31", "date": "2025-05-31 → 11", "id": "E42", "cat": "開發案場", "text": "（他區對照）紅葉部落諮商投票逾九成同意；業者設在地辦公室、簽合作備忘錄", "mean": "溝通 5 年後取得同意的路徑", "src": "S72"}, {"k": "2025-10-17", "date": "2025-10-17", "id": "E43", "cat": "政策法規", "text": "立法院三讀《平埔原住民族群身分法》，權利保障須於施行後 3 年內另行立法", "mean": "凱達格蘭等平埔族群未來可能取得的權利", "src": "S69"}, {"k": "1964-00-00", "date": "1964–1985", "id": "E45", "cat": "探勘調查", "text": "能礦所（工研院前身）與中油在大屯山鑽數十口淺井、7 口深井；馬槽曾鑽獲熱水氣，用於地熱溫室、木材乾燥及養殖；大磺嘴因安山岩過厚未形成汽層", "mean": "歷史鑽井資料，可作潛能與失敗原因參考", "src": "S82"}, {"k": "2024-12-00", "date": "2024 年底", "id": "E47", "cat": "火山與地震", "text": "馬槽一號產能測試後井底壓力超過預期，蒸氣連續噴發約 3 個月", "mean": "井控風險", "src": "S83"}, {"k": "2025-03-00", "date": "2025-03 底", "id": "E49", "cat": "火山與地震", "text": "馬槽一號首次灌漿封井時井噴，蒸氣與水泥漿波及民宅與樹林", "mean": "封井階段同樣有風險", "src": "S83"}];
+Object.entries({"S01": ["陽明山國家公園管理處《永續草山保育前瞻》簡報（2026-02-26）", "官方", "https://www.taiwan.nps.gov.tw/upload/file/2026-02-26/55126cfa-cf8c-4dc7-beb3-103838142277/永續草山保育前瞻簡報.pdf"], "S02": ["營建署（現國家公園署）國家公園經營管理統計（105 年底）", "官方", "https://www.nlma.gov.tw/uploads/files/9aeb3ad96ffcb55d65e0bfc65f6d29bf.pdf"], "S04": ["最高行政法院 113 年度上字第 118 號判決（2026-01-08）", "官方", "https://judgment.judicial.gov.tw/FILES/TPAA/113%2c%e4%b8%8a%2c118%2c20260108%2c1.pdf"], "S05": ["工研院 李奕亨〈大屯山地熱及地物技術〉（2015）", "學術", "https://www.gep.ncu.edu.tw/storage/speech/93/大屯山地熱及地物技術_20150508.pdf"], "S07": ["盧乙嘉等〈由日本法規鬆綁看臺灣國家公園地熱開發〉國家公園學報 31(1)，2021", "學術", "https://www.nps.gov.tw/filesys/dl/type3/193/2999_7aa7f537854167d9619cfb6739f053ad.pdf"], "S09": ["科技新報（新北市府新聞）2025-01-02", "官方／媒體", "https://technews.tw/2025/01/02/the-countrys-first-volcanic-geothermal-development-project/"], "S11": ["理財周刊（新北市經發局說明）2023-11-20", "官方／媒體", "https://www.moneyweekly.com.tw/_Article?AID=132543"], "S12": ["數位時代〈全台首座火山地熱電廠〉2023-11", "媒體", "https://www.bnext.com.tw/article/77514/-fabulous-group-volcanic-geothermal-"], "S13": ["NOWnews〈大屯山四磺子坪先導廠〉", "媒體／業者", "https://www.nownews.com/news/6603956"], "S14": ["TVBS〈會發電的山〉2025-04-20", "媒體", "https://news.tvbs.com.tw/life/2845520"], "S17": ["工商時報〈再生能源發展條例地熱專章 民團：法務部踩得太硬了〉2023-12-08", "媒體", "https://www.ctee.com.tw/news/20231208701342-430104"], "S18": ["地熱能探勘與開發許可及管理辦法（2024-05-13）", "官方", "https://6laws.net/6law/law3/地熱能探勘與開發許可及管理辦法.htm"], "S19": ["科技新報〈地熱子法完善申設法規〉2024-06-04", "媒體", "https://technews.tw/?p=1236755"], "S23": ["旺得富〈地礦中心：五大潛力區探勘成果〉2025-08-28", "媒體", "https://wantrich.chinatimes.com/news/20250828900016-420501"], "S25": ["科技新報〈地熱深層潛力場域論壇〉2024-12-17", "媒體", "https://technews.tw/2024/12/17/gsmma-geothermal-progressive/"], "S34": ["TVBS〈大屯火山和龜山島都是活火山〉2019-05-29", "媒體", "https://news.tvbs.com.tw/life/1140610"], "S36": ["鉅亨網（中研院研之有物）岩漿庫地下 8 km", "學術／媒體", "https://news.cnyes.com/news/id/4774026"], "S38": ["三立新聞 大屯火山相關報導彙整", "媒體", "https://www.setn.com/klist/17684"], "S39": ["公視〈中研院團隊證實 大屯山萬年內有噴發可能〉", "媒體", "https://news.pts.org.tw/article/485797"], "S46": ["監察院調查報告（陽明山國家公園土地變更）", "官方", "https://cybsbox.cy.gov.tw/CYBSBoxSSL/edoc/download/53248"], "S49": ["自由時報〈四磺子坪商轉暨硫磺子坪動土〉2023-11-20", "媒體", "https://news.ltn.com.tw/news/NewTaipei/breakingnews/4496182"], "S54": ["循環經濟（地熱發電單一服務窗口資料轉述）", "媒體", "https://reccessary.com/zh-tw/news/world-market/what-is-geothermal-power"], "S57": ["中央社〈中油明年啟動大屯山地熱研究〉2017-12-17", "媒體", "https://www.cna.com.tw/news/firstnews/201712170058.aspx"], "S58": ["科技新報〈氣象局長：大屯山岩漿庫研究不應過度解讀〉2017-02-21", "媒體", "https://technews.tw/2017/02/21/mt-datun-is-not-live-volcano/"], "S64": ["維基百科 陽明山國家公園（大屯國立公園沿革）", "其他", "https://zh.wikipedia.org/zh-tw/陽明山國家公園"], "S67": ["文化部國家文化記憶庫〈北投的硫磺礦業〉", "官方", "https://tcmb.culture.tw/zh-tw/detail?indexCode=Culture_Event&id=328763"], "S69": ["中央社〈立院三讀平埔族身分法 政府3年內應修法保障其權利〉2025-10-17", "媒體", "https://www.cna.com.tw/news/aipl/202510170188.aspx"], "S71": ["公視〈地熱開發案 紅葉部落不滿未經同意就鑽探〉2020-10-14", "媒體", "https://news.pts.org.tw/article/497128"], "S72": ["科技新報〈倍速羅得取得紅葉部落諮商同意〉2025-11-10", "媒體", "https://technews.tw/?p=1465116"], "S82": ["臺北市政府產業發展局 臺北溫泉主題網〈探勘地熱新能源〉", "官方", "https://hotspringflower.gov.taipei/cp.aspx?n=FDFB9B5AFA4EA793"], "S83": ["聯合報／倡議家〈地熱雙面刃…難擋高溫蒸氣波及生態、原鄉權益衝突 制度缺口一一浮現〉2025-06-24", "媒體", "https://ubrand.udn.com/ubrand/story/123661/8819885"]}).forEach(([k,v])=>{if(!SRC[k])SRC[k]=v});
+const ERAS=[
+ ["0000","1985-99","一、硫磺、國家公園與早期探勘（17 世紀–1985）","大屯的硫磺從 17 世紀起就有人開採交易。1960 年代政府鑽了數十口井，但酸性熱水腐蝕管線，開發停擺；1985 年國家公園成立，主要熱區劃入園區、禁止採硫。"],
+ ["1986","2017-99","二、火山監測與重新評估（1986–2017）","2011 年設大屯火山觀測站，工研院估潛能 514 MWe，活火山的認定引起討論；2017 年底中油宣布重啟地熱研究。"],
+ ["2018","2023-08-99","三、民間進場與法規鋪路（2018–2023 年中）","民間開發商出現，陽明山第 4 次通檢把馬槽西區改劃，經濟部設單一窗口，2023 年《再生能源發展條例》增訂地熱專章。"],
+ ["2023-09","2023-99","四、首座火山型地熱電廠商轉（2023 下半年）","四磺子坪先導電廠成為全台第一座火山型地熱電廠；隔壁硫磺子坪動土，居民開始擔心地下水量。"],
+ ["2024","2024-99","五、探勘加速與馬槽一號（2024）","探勘許可辦法公告，中油、台電與國際團隊投入大屯山。政府的馬槽一號探勘井測得高溫，同時 3.5 公里外居民陳情噪音與異味，井口蒸氣連續噴發約 3 個月。"],
+ ["2025","2025-99","六、井噴、生態受損與修法討論（2025）","馬槽一號封井時井噴，立法院質詢，陽管處初步調查約 3 公頃植被受損；Google 簽下首宗地熱購電；國家公園法是否開放地熱仍在討論。"],
+ ["2026","2026-99","七、園外優先與時程延後（2026）","法院駁回馬槽遊憩區變更上訴；政府表示大屯先在國家公園外圍開發；硫磺子坪延到 2027 上半年取得電業執照；地熱資料庫公開；國家公園法草案未見開放地熱。"]
+];
+
+const ROLES={
+ dev:{name:"開發商",ch:"開",c:"#A65A12",desc:"提出開發案，準備每個階段的申請文件，回應各方意見。",
+   task:"勾選已備妥的文件；在「意見」分頁說明你的承諾，例如監測門檻和超標時的處置。",can:["docs","opinion"]},
+ auth:{name:"主管機關",ch:"主",c:"#A23A2E",desc:"能源署等主管機關。設定因子權重，檢核門檻，最後核發許可。",
+   task:"在「因子與數據」設定權重（總和 100）；在「門檻檢核」判定每條規則；在「審查與許可」做出決定並寫明依據。",can:["weights","rules","permit","opinion"]},
+ exam:{name:"審查者",ch:"審",c:"#5E4391",desc:"聯審委員。檢查文件是否齊全，彙整專家評分與各方意見。",
+   task:"確認文件齊全度；在「審查與許可」寫下審查紀錄與建議，交給主管機關決定。",can:["review","opinion"]},
+ expert:{name:"專家",ch:"專",c:"#235F9C",desc:"地科、環境或能源學者。依數據替 10 項因子評分，並寫下不確定性。",
+   task:"在「審查與許可」替每項因子打 0–100 分；分數要附理由，缺資料就寫缺資料。",can:["score","opinion"]},
+ resident:{name:"居民",ch:"居",c:"#17706B",desc:"金山、萬里、北投一帶居民。最在意地下水、噪音、安全與交通。",
+   task:"看「因子與數據」，在「意見」分頁表達立場：支持、附條件支持或反對，並寫出你要的條件。",can:["opinion"]},
+ biz:{name:"溫泉業者",ch:"溫",c:"#5F6B1E",desc:"其他業者，以溫泉業為主。擔心溫泉水量、水溫與觀光受影響。",
+   task:"看地下水質、自然景觀、交通三項因子，在「意見」分頁提出監測要求。",can:["opinion"]},
+ indig:{name:"原住民族",ch:"原",c:"#7A4B2A",desc:"關心大屯凱達格蘭族歷史的族人代表。陽明山周邊目前不屬法定原住民族地區。",
+   task:"檢查「其他」因子與門檻 R11；在「意見」分頁說明紀錄該怎麼寫、文化地景要怎麼處理。",can:["opinion"]}
+};
+const ROLE_ORDER=["dev","auth","exam","expert","resident","biz","indig"];
+
+/* 10 項因子：沿用原平台的因子名稱；內容換成大屯公開資料。rows: [項目, 數值, 來源, 狀態ok/warn/bad/na] */
+const FACTORS=[
+ {id:"air",name:"空氣品質（環境部測站）",what:"環境部空品測站的一般空氣品質資料。",
+  rows:[["陽明測站資料","待補：請查環境部空品監測網","",'na'],["大屯火山氣體連續觀測（CO₂ 通量、氡氣）","有資料集，但 2020 年後未更新","S99",'na']],
+  lim:"一般空品標準不含硫化氫；地熱案的硫化氫看下一項。"},
+ {id:"h2s",name:"自行監測空氣品質（H₂S）",what:"開發商在場址周界自行監測的硫化氫濃度。",
+  rows:[["嗅覺可察覺","0.01–1.5 ppm","S31",'ok'],["嗅覺麻痺","100–150 ppm（聞不到更危險）","S31",'bad'],["北投溫泉池工安事件","約 200 ppm，2 人死亡","S33",'bad'],["日本電廠周邊實測","51 點中 48 點 < 0.1 ppm","S32",'ok'],["馬槽一號：北市環保局 10 m 內檢測","只公布「無異常」，沒有數值","S84",'na'],["馬槽一號：「超標 9 倍」說法","僅見質詢影片標題，未見官方數據","S85",'na']],
+  lim:"門檻 R7（建議）：預估周界持續 > 0.1 ppm 須加強處理或監測。",stages:[2,3]},
+ {id:"noise",name:"噪音",what:"鑽井與電廠運轉的噪音，日間、晚間、夜間分開看。",
+  rows:[["國家公園的管制區類別","新北、臺北都列為第一類","S104、S105",'warn'],["營建・第一類 日／晚／夜","67／47／47 dB(A)","S29",'warn'],["營建・第三類 夜間","62 dB(A)（比第一類寬 15 dB）","S29",'warn'],["工廠・第一類 夜間","40 dB(A)","S30",'warn'],["馬槽一號：居民陳情","3.5 km 外陳情 24 小時噪音；沒有公開分貝值","S84",'bad'],["馬槽一號：主管機關認定","北市環保局認定探勘鑽井「非噪音管制對象」","S84",'warn']],
+  lim:"門檻 R6（法定）：超過所屬管制區標準須減噪或調整時段。但馬槽一號案曾被認定不屬管制對象，所以還需要一條「建議」門檻。",stages:[2,3]},
+ {id:"vib",name:"振動",what:"鑽機、重車造成的地面與房屋振動。",
+  rows:[["本案振動監測","待補","",'na']],
+  lim:"振動來自地表施工，要和地下的微震分開看。施工前做屋況調查。"},
+ {id:"geo",name:"地質",what:"微震、火山活動與地質災害敏感區。",
+  rows:[["大屯微震背景","每月約 150 次；集中在七星山、大油坑、八煙","S34、S106",'ok'],["岩漿庫頂部","約地下 8 km","S36",'warn'],["馬槽一號井監測","設有光纖 DAS／DTS，兼作火山監測","S81",'ok'],["大屯地震月統計","待補：需氣象署 GDMS 帳號下載","",'na'],["馬槽遊憩區危險型敏感","50.2%（西 56%、東 46%）","S04",'bad'],["火山燈號","綠／黃（一級）／紅（二級）","S39",'warn']],
+  lim:"門檻 R2（參照）：危險型敏感聯集 > 50% → No-Go。R8（建議）：黃燈以上或微震顯著高於背景 → 暫停鑽井。",stages:[0,2]},
+ {id:"surf",name:"地表水質",what:"溪水的酸鹼、濁度、導電度。",
+  rows:[["地熱流體性質","酸性硫磺泉，具強腐蝕性","S13",'warn'],["耐蝕實驗條件","pH 1.2、100°C（實驗值，不是現場實測）","S88",'warn'],["本案溪水監測","未公開","",'na']],
+  lim:"上下游對照。導電度突升可能有地熱水混入。"},
+ {id:"ground",name:"地下水質（含溫泉）",what:"地下水位、溫泉水量與水溫、回注率。",
+  rows:[["法定回注率","≥ 90%","S17",'ok'],["居民疑慮","硫磺子坪動土後擔心地下水量","S16",'warn'],["500 m 規則","井體 500 m 內有溫泉井須提影響說明","S18",'warn'],["大屯溫泉溫度","40–98°C；12 個高溫、12 個中低溫溫泉","S82",'ok'],["金山萬里泉源出口","89–99°C","S88",'ok'],["水利署地下水觀測井（大屯周邊 7 區）","只有 2 口：北投(1)、北投(2)，在北投焚化廠，屬臺北盆地平地，井深 22 m、59 m","S103",'warn'],["金山、萬里、士林、三芝、石門、淡水","0 口：金山三個案場附近沒有水利署地下水觀測","S103",'bad'],["本案溫泉水位基線","未公開","",'na']],
+  lim:"門檻 R3、R4（法定）。90% 是下限，不是「沒有影響」的證明。大屯山區沒有公部門的地下水觀測井，開發前的地下水基線必須另外設置監測。",stages:[1,3]},
+ {id:"land",name:"自然景觀",what:"國家公園分區、森林與遊憩景觀。",
+  rows:[["森林覆蓋率","約 80%","S01",'ok'],["特別景觀區","5,378 ha，占 47.4%","S02",'warn'],["潛力前四名位置","4／4 在國家公園內","S06",'bad'],["馬槽一號：植被受損","約 3 公頃（陽管處初步調查）","S83",'bad'],["硫磺子坪開發面積","約 2 公頃，剛好在環評門檻附近","S91",'warn']],
+  lim:"門檻 R1（法定）：生態保護區、特別景觀區、史蹟保存區 → No-Go。",stages:[0]},
+ {id:"traffic",name:"交通",what:"工程車動線、步道封閉與遊客動線。",
+  rows:[["陽明山年遊客","約 600 萬人次","S01",'warn'],["園區居民","約 9,000 人","S01",'warn'],["本案工程車次","待補","",'na']],
+  lim:"「很少人走」要追問是誰、什麼季節在走。"},
+ {id:"other",name:"其他（文化與權益）",what:"原住民族地區認定、文化地景、地方說明會。",
+  rows:[["是否屬原住民族地區","否（新北只有烏來，臺北沒有）","S70",'ok'],["歷史上的原住民族","凱達格蘭族北投社、金包里社","S67",'warn'],["平埔族群權利立法","施行後 3 年內另立法，是否適用諮商未知","S69",'na'],["地方說明會","探勘、開發動工前各須辦理並備查","S19",'ok'],["說明會紀錄","查無公開紀錄（法規只要求備查，不要求公開）","S19",'na']],
+  lim:"門檻 R11：紀錄寫「目前法定不觸發」，不寫「不適用」。",stages:[1]}
+];
+
+const STAGES=[
+ {name:"資源調查階段",s:"S0–S1",goal:"在花錢探勘前，排除法律上不可行、災害風險過高的區位，並用地表調查找出熱源與裂隙。",
+  docs:[["區位篩選疊圖（分區、敏感區、潛能）","確認不在生態保護區、特別景觀區（R1）"],["危險型環境敏感面積計算","聯集面積 > 50% 不宜開發（R2）"],["地表調查成果（地質、地化、地物）","學術地表調查不需探勘許可（S62）"],["既有地熱井、溫泉井位置查詢","為下一階段的 500 m 規則做準備"],["資源潛能估計與口徑說明","514 MWe、淺層 500 MW、深層 3 GW 口徑不同"]],
+  rules:["R1","R2"]},
+ {name:"環境監測作業",s:"S2",goal:"申請探勘許可前，建立環境基線、辦理地方說明會、評估對溫泉井的影響。",
+  docs:[["探勘計畫書","場址範圍、鑽井與測試、工程進度、經費"],["自有資金證明","≥ 500 萬元，公營事業除外（R9）"],["500 m 影響說明與減緩措施","井體 500 m 內有既有井或溫泉井時（R3）"],["地方說明會紀錄","須辦理並備查；名單涵蓋臺北、新北兩側。大屯案場目前查無公開紀錄"],["環境基線監測計畫","溫泉水位、水質、噪音、硫化氫；涵蓋乾季與雨季。小型案場多半不必環評，就沒有法定基線；金山、萬里也沒有水利署地下水觀測井（S103）"],["原住民族地區檢核紀錄","寫明檢核日期與依據（R11）"]],
+  rules:["R3","R9","R11"]},
+ {name:"地熱探勘階段",s:"S3–S4",goal:"鑽探勘井、做產能測試，確認溫度與流量是否足以開發，並評估財務可行性。",
+  docs:[["鑽井計畫與井口防噴設計","含停機壓力值"],["井控與緊急封井計畫","馬槽一號測試後失控噴氣約 3 個月、封井時井噴（R10）"],["噪音管制區類別與減噪計畫","24 小時鑽井，第一類夜間 47 dB(A)（R6）"],["硫化氫偵測、警報與疏散計畫","周界目標 0.1 ppm（R7）"],["火山燈號應變計畫","誰判讀、何時停、何時恢復（R8）"],["產能測試報告","溫度、流量、流體 pH；馬槽一號 245°C @1,020 m（S81），流量未公開"],["財務試算","費率 × 容量 × 容量因數；5 MW 是費率分界（S26）"]],
+  rules:["R6","R7","R8","R10"]},
+ {name:"地熱開發階段",s:"S5–S7",goal:"取得開發許可、環評（若達門檻）、土地與水權，建廠併網。",
+  docs:[["開發計畫書","容量、井數、技術路線"],["環評判定","敏感區 ≥ 10 MW 或 ≥ 2 ha 須環評（R5）"],["回注計畫","回注率 ≥ 90%（R4）"],["溫泉產業影響分析","溫泉區內開發須分析"],["地熱水權申請","年限 20 年（S17）"],["運轉噪音與監測公開計畫","工廠第一類夜間 40 dB(A)"]],
+  rules:["R4","R5","R6"]}
+];
+
+const RULES={
+ R1:["位於生態保護區、特別景觀區、史蹟保存區","No-Go","法定","S03b、S04"],
+ R2:["危險型環境敏感因子聯集面積 > 50%","No-Go","參照（陽明山第 4 次通檢）","S04"],
+ R3:["井體地表投影 500 m 內有既有地熱井或溫泉核准井","須提影響說明與減緩措施","法定","S18"],
+ R4:["規劃尾水回注率 < 90%","不符","法定","S17"],
+ R5:["敏感區 ≥ 10 MW 或 ≥ 2 ha；一般區 ≥ 50 MW","須環評","法定（2024 預告，請核對現行條文）","S40"],
+ R6:["預估噪音超過所屬管制區標準（2024-12 北市環保局曾認定馬槽探勘鑽井非管制對象）","須減噪設計或調整時段","法定","S29、S30、S84"],
+ R7:["預估周界硫化氫持續 > 0.1 ppm","須加強處理或監測","建議","S32"],
+ R8:["火山燈號黃燈以上，或微震顯著高於背景（每月約 150 次）","暫停鑽井、啟動專家諮詢","建議","S34、S39"],
+ R9:["探勘申請人自有資金 < 500 萬元（公營除外）","不符資格","法定","S18"],
+ R10:["產能測試或封井作業位於國家公園內，或距住宅 < 3.5 km","須提出井控與緊急封井計畫、蒸氣擴散與植被影響監測","建議（依馬槽一號事件）","S83、S84"],
+ R11:["場址屬原住民族地區或原住民族土地","啟動部落諮商；不屬時記為「目前法定不觸發」","法定（本平台增列）","S17、S70"]
+};
+
+/* ============ 狀態（只存在這台裝置的瀏覽器） ============ */
+const KEY="tatun-dss-v1";
+const blank=()=>({role:null,stage:0,tab:"docs",docs:{},rules:{},weights:Object.fromEntries(FACTORS.map(f=>[f.id,10])),scores:{},ops:[],review:{},permit:{}});
+let S=blank();
+try{const t=JSON.parse(localStorage.getItem(KEY)||"null");if(t)S=Object.assign(blank(),t)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const can=a=>S.role&&ROLES[S.role].can.includes(a);
+const ST={ok:["正常","c-ok"],warn:["注意","c-warn"],bad:["警戒","c-bad"],na:["缺資料","c-na"]};
+function link(code){const x=SRC[code];if(!x)return esc(code);return x[2]?`<a href="${esc(x[2])}" target="_blank" rel="noopener" title="${esc(x[0])}">${code}</a>`:`<span title="${esc(x[0])}">${code}</span>`}
+const links=s=>s?s.split("、").map(link).join("、"):"";
+function permitChip(i){const p=S.permit[i];if(!p)return `<span class="chip c-na">未審查</span>`;
+  return `<span class="chip ${p.d==="核可"?"c-ok":p.d==="附條件核可"?"c-warn":"c-bad"}">${esc(p.d)}</span>`}
+const wsum=()=>FACTORS.reduce((a,f)=>a+(+S.weights[f.id]||0),0);
+
+/* 單一數列長條圖（容量與發電量分兩張，不共用 y 軸） */
+function barChart(key,title,unit){
+  const W=360,H=180,pl=34,pr=8,pt=22,pb=24,vals=ANNUAL.map(r=>r[key]).filter(v=>v!=null);
+  const step=key==="cap"?2:10,top=Math.ceil(Math.max(...vals)*1.15/step)*step;
+  const n=ANNUAL.length,bw=(W-pl-pr)/n,barW=Math.min(30,bw-8),y=v=>pt+(H-pt-pb)*(1-v/top);
+  const ticks=[];for(let t=0;t<=top;t+=step)ticks.push(t);
+  let lastIdx=-1;ANNUAL.forEach((r,i)=>{if(r[key]!=null)lastIdx=i});
+  const bars=ANNUAL.map((r,i)=>{const cx=pl+bw*i+bw/2,x0=cx-barW/2,v=r[key];
+    const lab=`<text x="${cx}" y="${H-pb+15}" text-anchor="middle" class="ax">${r.y}</text>`;
+    if(v==null)return `${lab}<rect x="${x0}" y="${y(top*0.25)}" width="${barW}" height="${y(0)-y(top*0.25)}" fill="none" stroke="var(--muted)" stroke-dasharray="3 3" rx="4"/><text x="${cx}" y="${y(top*0.25)-5}" text-anchor="middle" class="ax">缺</text>
+      <rect class="hit" x="${pl+bw*i}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent" data-tip="${r.y}：缺資料"/>`;
+    const yy=y(v),h=y(0)-yy,rr=Math.min(4,h);
+    const d=h<=0?"":`M${x0},${y(0)} V${yy+rr} Q${x0},${yy} ${x0+rr},${yy} H${x0+barW-rr} Q${x0+barW},${yy} ${x0+barW},${yy+rr} V${y(0)} Z`;
+    const note=key==="gen"&&r.genNote?`（${r.genNote}）`:"";
+    return `${lab}${d?`<path d="${d}" fill="var(--accent)" ${note?'fill-opacity=".55"':""}/>`:""}
+      ${i===lastIdx?`<text x="${cx}" y="${yy-6}" text-anchor="middle" class="vl">${v}</text>`:""}
+      <rect class="hit" x="${pl+bw*i}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent" data-tip="${r.y}：${v} ${unit.split("（")[0]}${note}"/>`}).join("");
+  const desc=`${title}（${unit}）：`+ANNUAL.map(r=>`${r.y} ${r[key]??"缺"}`).join("、");
+  return `<figure class="chart" style="margin:0"><figcaption class="small"><b>${title}</b> <span class="muted">${unit}</span></figcaption>
+   <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(desc)}">
+    ${ticks.map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="1"/><text x="${pl-6}" y="${y(t)+3.5}" text-anchor="end" class="ax">${t}</text>`).join("")}
+    ${bars}</svg></figure>`;
+}
+
+/* ============ 畫面 ============ */
+function render(){
+  $("#who").innerHTML=S.role?`<span>我是：${ROLES[S.role].name}</span><button type="button" data-act="switch">換角色</button>`:"";
+  if(!S.role)return renderPick();
+  const r=ROLES[S.role],st=STAGES[S.stage];
+  $("#app").innerHTML=`
+  <div class="case"><h1>大屯地熱開發教學案 <span class="tag">教學案</span></h1><span class="muted small">地點：大屯火山群（金山、萬里、北投一帶）｜資料截至 2026-11-08</span></div>
+  <p class="muted small" style="margin:0">案場是教學設定；因子裡的數據都是大屯一帶的真實公開資料，標有來源代碼。標「未公開」「待補」的，是查不到公開資料的項目。</p>
+  <details class="card" style="margin-top:10px;padding:8px 14px"><summary><b>大屯實際案場與全國裝置容量</b> <span class="small muted">（點開）</span></summary>
+    <div class="tblwrap" style="margin-top:8px;overflow-x:auto"><table class="scoretbl" style="min-width:560px"><thead><tr><th>案場</th><th>地點</th><th>容量</th><th>現況與數字</th><th>來源</th></tr></thead>
+    <tbody>${SITES.map(x=>`<tr><td><b>${esc(x[0])}</b></td><td>${esc(x[1])}</td><td>${esc(x[2])}</td><td>${esc(x[3])}</td><td class="src">${links(x[4])}</td></tr>`).join("")}</tbody></table></div>
+    <p class="small" style="margin:12px 0 4px"><b>全國地熱：2018–2024 年度統計</b></p>
+    <div class="grid2">${barChart("cap","全國地熱裝置容量","MW")}${barChart("gen","全國地熱發電量","GWh（百萬度）")}</div>
+    <p class="src" style="margin:4px 0 0">2018–2023 來源 ${link("S111")}（官方）；2024 發電量 26.741 GWh 為媒體引用能源署統計 ${link("S14")}，請以《能源統計手冊 2024》或資料集 165163 校正；2024 裝置容量待補。</p>
+    <details style="margin-top:4px"><summary class="small muted">看數據表</summary><table class="scoretbl" style="max-width:420px"><thead><tr><th>年</th><th>裝置容量 MW</th><th>發電量 GWh</th></tr></thead><tbody>${ANNUAL.map(r=>`<tr><td>${r.y}</td><td>${r.cap==null?"缺":r.cap}</td><td>${r.gen}${r.genNote?`（${r.genNote}）`:""}</td></tr>`).join("")}</tbody></table></details>
+    <p class="small" style="margin:10px 0 4px"><b>全國地熱：目標與實際</b></p>
+    <p class="small" style="margin:0">${CAPACITY.map(x=>`${esc(x[0])}：<b>${esc(x[1])}</b> <span class="src">${links(x[2])}</span>`).join("　｜　")}</p></details>
+  <nav class="stages" aria-label="四個階段">${STAGES.map((x,i)=>`<button type="button" class="stg" data-stage="${i}" ${i===S.stage?'aria-current="step"':""}><span class="shape"></span><span class="lab"><b>${x.name}</b><small>${x.s}</small>${permitChip(i)}</span></button>`).join("")}</nav>
+  <div class="card task" style="--rc:${r.c}"><h3>${esc(r.name)}在「${st.name}」的任務</h3><p>${esc(r.task)}</p><p class="muted small">本階段目標：${esc(st.goal)}</p></div>
+  ${S.stage===2?`<details class="card" open style="border-left:5px solid var(--bad);margin-bottom:6px"><summary><b>真實案例：馬槽一號事件（2024–2025）</b></summary>
+    <p class="small muted" style="margin:6px 0">大屯目前唯一有公開紀錄的探勘階段環境事故。政府自己是開發方（地礦中心），井位在國家公園內。噪音分貝、硫化氫數值、蒸氣流量都沒有公開。</p>
+    <div class="ops">${MACHAO.map(x=>`<div class="op" style="--rc:var(--bad)"><p><b>${esc(x[0])}</b>　${esc(x[1])} <span class="src">${links(x[2])}</span></p></div>`).join("")}</div>
+    <p class="small" style="margin:8px 0 0">討論：如果這一階段的文件與門檻當初都有做到，哪一項最可能避免或減輕這個事件？</p></details>`:""}
+  <div class="tabs" role="tablist">${[["docs","文件"],["factors","因子與數據"],["rules","門檻檢核"],["ops","意見"],["review","審查與許可"],["news","新聞始末"]].map(([k,l])=>{
+    const mine={docs:can("docs"),factors:can("weights"),rules:can("rules"),ops:can("opinion"),review:can("review")||can("score")||can("permit"),news:false}[k];
+    return `<button type="button" class="tab" role="tab" aria-selected="${S.tab===k}" data-tab="${k}" style="--rc:${r.c}">${l}${mine?'<span class="dot" title="你可以在這裡操作"></span>':""}</button>`}).join("")}</div>
+  <section id="panel"></section>
+  <p class="note">資料整理自政府公告、法規、司法判決、學術研究與新聞報導（資料蒐集截止 2026-11-08）。法規門檻會修正，實際標準以全國法規資料庫與主管機關最新公告為準。你在這裡填的內容只存在這台裝置的瀏覽器，不會上傳；要交給別人，請用「審查與許可」裡的「複製本階段摘要」。本平台參照「環境影響評估模擬試辦協作平台」的架構簡化而成，為教學用，不構成法律、投資或工程建議。
+  <button type="button" class="btn ghost" data-act="reset" style="margin-left:6px;padding:2px 10px;font-size:12.5px">清除所有填寫內容</button></p>`;
+  ({docs:pDocs,factors:pFactors,rules:pRules,ops:pOps,review:pReview,news:pNews})[S.tab]();
+}
+function renderPick(){
+  $("#app").innerHTML=`<h1>選擇你的角色</h1>
+  <p class="muted">以大屯火山群地熱開發為教學案。選好角色後，依四個階段檢視文件、數據與門檻，表達意見，最後由主管機關決定是否核發許可。</p>
+  <div class="roles">${ROLE_ORDER.map(id=>{const r=ROLES[id];return `<button type="button" class="role" data-role="${id}" style="--rc:${r.c}"><span class="av">${r.ch}</span><span><b>${r.name}</b><span>${r.desc}</span></span></button>`}).join("")}</div>`;
+}
+
+function pDocs(){
+  const st=STAGES[S.stage],n=st.docs.length,done=st.docs.filter((_,i)=>S.docs[S.stage+"-"+i]).length;
+  $("#panel").innerHTML=`<h2>${st.name}：申請文件</h2>
+  ${can("docs")?"":`<p class="readonly">只有開發商可以勾選；你可以檢查文件是否齊全。</p>`}
+  <p class="small muted" style="margin:0">已備妥 ${done}／${n}</p><div class="progress"><i style="width:${Math.round(done/n*100)}%"></i></div>
+  <div class="docs">${st.docs.map((d,i)=>`<label class="doc"><input type="checkbox" data-doc="${S.stage}-${i}" ${S.docs[S.stage+"-"+i]?"checked":""} ${can("docs")?"":"disabled"}><span><p>${esc(d[0])}</p><p class="why">${esc(d[1]).replace(/S\d{2}b?/g,link)}</p></span><span class="chip ${S.docs[S.stage+"-"+i]?"c-ok":"c-na"}">${S.docs[S.stage+"-"+i]?"已備妥":"未備妥"}</span></label>`).join("")}</div>`;
+}
+function pFactors(){
+  const w=wsum();
+  $("#panel").innerHTML=`<h2>10 項因子與數據</h2>
+  <p class="muted small" style="margin-top:0">加框的是「${STAGES[S.stage].name}」最需要看的因子。${can("weights")?`你是主管機關，可以設定每項因子的權重；目前總和 <b style="color:${w===100?"var(--ok)":"var(--bad)"}">${w}</b>（需為 100）。`:"權重由主管機關設定。"}</p>
+  <div class="factors">${FACTORS.map(f=>`<article class="card fac ${f.stages&&f.stages.includes(S.stage)?"focus":""}">
+    <div class="hd"><h3 style="margin:0">${esc(f.name)}</h3><span class="small muted">權重 ${S.weights[f.id]||0}%</span></div>
+    <p class="small muted" style="margin:0">${esc(f.what)}</p>
+    <table><tbody>${f.rows.map(([a,v,s,stt])=>`<tr><td>${esc(a)}</td><td><b>${esc(v)}</b> <span class="chip ${ST[stt][1]}">${ST[stt][0]}</span>${s?`<br><span class="src">來源 ${links(s)}・${esc(SRC[s.split("、")[0]]?.[1]||"")}</span>`:""}</td></tr>`).join("")}</tbody></table>
+    <p class="lim">${esc(f.lim)}</p>
+    ${can("weights")?`<label class="wt">權重 <input type="number" min="0" max="100" step="5" data-w="${f.id}" value="${S.weights[f.id]||0}"> %</label>`:""}
+  </article>`).join("")}</div>`;
+}
+function pRules(){
+  const st=STAGES[S.stage];
+  $("#panel").innerHTML=`<h2>${st.name}：門檻檢核</h2>
+  <p class="muted small" style="margin-top:0">任一條判定為「觸發」，就是 No-Go 或必須補件。「法定」有法規依據；「參照」引用政府文件的原則；「建議」沒有法律效力。${can("rules")?"你是主管機關，請逐條判定。":"判定由主管機關填寫。"}</p>
+  <div class="rules">${st.rules.map(id=>{const x=RULES[id],v=S.rules[S.stage+"-"+id]||"";
+    return `<div class="card rule"><span class="id">${id}</span><div><p><b>${esc(x[0])}</b></p><p class="small">結果：${esc(x[1])}　<span class="nature">${esc(x[2])}</span>　<span class="src">來源 ${links(x[3])}</span></p></div>
+    ${can("rules")?`<select data-rule="${S.stage}-${id}" aria-label="${id} 判定"><option value="" ${!v?"selected":""}>待確認</option><option ${v==="未觸發"?"selected":""}>未觸發</option><option ${v==="觸發"?"selected":""}>觸發</option></select>`
+      :`<span class="chip ${v==="未觸發"?"c-ok":v==="觸發"?"c-bad":"c-na"}" style="justify-self:start">${v||"待確認"}</span>`}</div>`}).join("")}</div>`;
+}
+function pOps(){
+  const list=S.ops.filter(o=>o.stage===S.stage);
+  $("#panel").innerHTML=`<div class="grid2"><div>
+  <h2>表達意見</h2>
+  ${can("opinion")?`<form class="f" id="opf"><label for="op-stance">立場<select id="op-stance"><option>支持</option><option selected>附條件支持</option><option>反對</option><option>需要更多資料</option></select></label>
+    <label for="op-text">理由與條件（引用因子或門檻，例如「地下水質：溫泉水位基線未公開」）<textarea id="op-text" required></textarea></label>
+    <button class="btn" type="submit">送出意見</button></form>`:`<p class="readonly">你的角色不在這裡表達意見。</p>`}
+  </div><div><h2>本階段的意見（${list.length}）</h2>
+  <div class="ops">${list.length?list.map(o=>`<div class="op" style="--rc:${ROLES[o.role].c}"><p><b>${ROLES[o.role].name}</b>・${esc(o.stance)}　<span class="small muted">${esc(o.time)}</span></p><p>${esc(o.text)}</p></div>`).join(""):`<p class="muted">還沒有意見。</p>`}</div></div></div>`;
+}
+function weighted(){const ids=FACTORS.map(f=>f.id).filter(id=>S.scores[id]!=null&&S.scores[id]!=="");
+  if(!ids.length||wsum()===0)return null;const w=ids.reduce((a,id)=>a+(+S.weights[id]||0),0);if(!w)return null;
+  return Math.round(ids.reduce((a,id)=>a+(+S.scores[id])*(+S.weights[id]||0),0)/w)}
+function pReview(){
+  const st=STAGES[S.stage],n=st.docs.length,done=st.docs.filter((_,i)=>S.docs[S.stage+"-"+i]).length;
+  const trig=st.rules.filter(id=>S.rules[S.stage+"-"+id]==="觸發"),pend=st.rules.filter(id=>!S.rules[S.stage+"-"+id]);
+  const ops=S.ops.filter(o=>o.stage===S.stage),cnt=s=>ops.filter(o=>o.stance===s).length;
+  const ws=weighted(),prevOK=S.stage===0||(S.permit[S.stage-1]&&S.permit[S.stage-1].d!=="退件");
+  const p=S.permit[S.stage]||{};
+  $("#panel").innerHTML=`<h2>${st.name}：審查與許可</h2>
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="card"><h3>審查摘要</h3>
+      <p style="margin:0">文件：<b>${done}／${n}</b> 已備妥</p>
+      <p style="margin:0">門檻：${trig.length?`<span class="chip c-bad">觸發 ${trig.join("、")}</span>`:`<span class="chip c-ok">無觸發</span>`} ${pend.length?`<span class="chip c-na">待確認 ${pend.join("、")}</span>`:""}</p>
+      <p style="margin:0">意見：支持 ${cnt("支持")}・附條件 ${cnt("附條件支持")}・反對 ${cnt("反對")}・要更多資料 ${cnt("需要更多資料")}</p>
+      <p style="margin:6px 0 0">專家加權分數：</p><p class="big" style="margin:0">${ws==null?"—":ws}</p>
+      <p class="small muted" style="margin:0">${ws==null?"專家還沒評分，或權重總和為 0。":`以主管機關權重加權（權重總和 ${wsum()}）。分數是參考，不取代門檻。`}</p></div>
+    <div class="card"><h3>專家評分（0–100，越高越有利）</h3>
+      ${can("score")?"":`<p class="readonly">由專家填寫。</p>`}
+      <table class="scoretbl"><thead><tr><th>因子</th><th>權重</th><th>分數</th></tr></thead><tbody>
+      ${FACTORS.map(f=>`<tr><td>${esc(f.name)}</td><td>${S.weights[f.id]||0}%</td><td>${can("score")?`<input type="number" min="0" max="100" step="5" data-score="${f.id}" value="${S.scores[f.id]??""}" aria-label="${esc(f.name)} 分數">`:(S.scores[f.id]??"—")}</td></tr>`).join("")}
+      </tbody></table></div>
+  </div>
+  <div class="grid2">
+    <div class="card f"><h3>審查紀錄</h3>
+      <label for="rv">審查者的紀錄與建議（缺哪些文件、哪些疑慮未解決）<textarea id="rv" ${can("review")?"":"readonly"}>${esc(S.review[S.stage]||"")}</textarea></label>
+      ${can("review")?`<button class="btn" type="button" data-act="saveReview">儲存審查紀錄</button>`:""}</div>
+    <div class="card f"><h3>許可決定</h3>
+      ${!prevOK?`<p class="readonly">上一階段尚未核可，這一階段還不能核發許可。</p>`:""}
+      <label for="pd">決定<select id="pd" ${can("permit")&&prevOK?"":"disabled"}><option value="">尚未決定</option>${["核可","附條件核可","退件"].map(d=>`<option ${p.d===d?"selected":""}>${d}</option>`).join("")}</select></label>
+      <label for="pr">依據與條件（條件要寫數值、期限與負責人）<textarea id="pr" ${can("permit")&&prevOK?"":"readonly"}>${esc(p.r||"")}</textarea></label>
+      ${can("permit")?`<button class="btn" type="button" data-act="permit" ${prevOK?"":"disabled"}>送出決定</button>`:""}
+      ${trig.length&&can("permit")?`<p class="small" style="color:var(--bad);margin:0">提醒：本階段有門檻被判定為觸發（${trig.join("、")}）。</p>`:""}</div>
+  </div>
+  <p style="margin-top:16px"><button class="btn ghost" type="button" data-act="copy">複製本階段摘要</button> <span class="small muted" id="msg" role="status"></span></p>`;
+}
+function pNews(){
+  const f=S.nf||"all",c=S.nc||"",st=STAGES[S.stage];
+  let items=[...EVENTS.map(x=>({...x,kd:"e"})),...NEWS.map(x=>({...x,kd:"n"}))];
+  if(f==="news")items=items.filter(x=>x.kd==="n");
+  if(f==="event")items=items.filter(x=>x.kd==="e");
+  if(f==="stage")items=items.filter(x=>x.kd==="n"&&x.stg.includes(S.stage));
+  if(c)items=items.filter(x=>x.cat===c);
+  items.sort((a,b)=>a.k<b.k?-1:a.k>b.k?1:(a.kd===b.kd?0:a.kd==="e"?-1:1));
+  const cats=["政策法規","開發案場","探勘調查","事故與爭議","火山與地震","市場與購電","背景"];
+  const seg=(attr,cur,opts)=>`<div class="seg" role="group">${opts.map(([v,l])=>`<button type="button" data-${attr}="${v}" aria-pressed="${cur===v}">${l}</button>`).join("")}</div>`;
+  const row=x=>x.kd==="n"
+    ?`<li class="ti"><span class="dt">${esc(x.date)}</span><div><p><span class="kind">新聞</span><span class="small muted">${esc(x.media)}・${esc(x.cat)}</span></p>
+       <p><a href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.title)}</b></a>${x.own?' <span class="small muted">（標題為自擬簡稱）</span>':""}</p>
+       <p>${esc(x.sum)}</p><p class="meta">案場：${esc(x.sites)}｜階段：${esc(x.sraw)}｜角色：${esc(x.roles)}</p></div></li>`
+    :`<li class="ti ev"><span class="dt">${esc(x.date)}</span><div><p><span class="kind">大事紀 ${esc(x.id)}</span><span class="small muted">${esc(x.cat)}</span></p>
+       <p><b>${esc(x.text)}</b></p><p class="meta">${x.mean&&x.mean!=="—"?`意義：${esc(x.mean)}｜`:""}來源 ${links(x.src)}</p></div></li>`;
+  const body=ERAS.map(([a,b,t,d])=>{const g=items.filter(x=>x.k>=a&&x.k<=b);if(!g.length)return "";
+    return `<section class="era"><h3>${t} <span class="small muted">${g.length} 筆</span></h3>${f==="all"&&!c?`<p>${d}</p>`:""}<ol class="tl">${g.map(row).join("")}</ol></section>`}).join("");
+  $("#panel").innerHTML=`<h2>新聞始末：大屯地熱的來龍去脈</h2>
+  <p class="muted small" style="margin-top:0">把歷史大事紀（${EVENTS.length} 筆）與 2023-11 到 2026-11 的新聞（${NEWS.length} 則）排成一條時間軸。實心點是大事紀，空心點是新聞。新聞摘要為改寫；標題標「自擬簡稱」的，請以連結頁面的原標題為準。</p>
+  ${seg("nf",f,[["all","全部始末"],["news","只看新聞"],["event","只看大事紀"],["stage",`與「${st.name}」有關的新聞`]])}
+  ${seg("nc",c,[["","所有類型"],...cats.map(x=>[x,x])])}
+  <p class="small muted" style="margin:0">共 ${items.length} 筆</p>
+  ${body||`<p class="muted">沒有符合條件的項目。</p>`}
+  <p class="small" style="margin-top:14px">討論：從這條時間軸看，哪幾個轉折點如果當時有更完整的資訊公開或地方溝通，後來的爭議可能會比較小？</p>`;
+}
+function summary(){
+  const st=STAGES[S.stage],i=S.stage,p=S.permit[i]||{};
+  const L=[`【大屯地熱開發教學案】${st.name}（${st.s}）`,
+   `文件：${st.docs.filter((_,k)=>S.docs[i+"-"+k]).length}/${st.docs.length} 已備妥`,
+   `門檻：${st.rules.map(id=>`${id} ${S.rules[i+"-"+id]||"待確認"}`).join("；")}`,
+   `專家加權分數：${weighted()??"—"}`,
+   `意見：`+(S.ops.filter(o=>o.stage===i).map(o=>`${ROLES[o.role].name}（${o.stance}）${o.text}`).join(" / ")||"無"),
+   `審查紀錄：${S.review[i]||"無"}`,
+   `許可決定：${p.d||"尚未決定"}${p.r?"；依據："+p.r:""}`];
+  return L.join("\n");
+}
+
+/* ============ 事件 ============ */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.role){S.role=b.dataset.role;S.tab="docs";save();render();window.scrollTo(0,0);return}
+  if(b.dataset.stage){S.stage=+b.dataset.stage;save();render();return}
+  if(b.dataset.tab){S.tab=b.dataset.tab;save();render();return}
+  if(b.dataset.nf!==undefined){S.nf=b.dataset.nf;save();render();return}
+  if(b.dataset.nc!==undefined){S.nc=b.dataset.nc;save();render();return}
+  const a=b.dataset.act;
+  if(a==="switch"){S.role=null;save();render();return}
+  if(a==="reset"){if(confirm("確定要清除這台裝置上所有的填寫內容嗎？")){const r=S.role;S=blank();S.role=r;save();render()}return}
+  if(a==="saveReview"){S.review[S.stage]=$("#rv").value;save();render();return}
+  if(a==="permit"){const d=$("#pd").value,r=$("#pr").value.trim();if(!d){alert("請先選擇決定。");return}if(d!=="核可"&&!r){alert("附條件核可或退件，請寫明依據與條件。");return}
+    S.permit[S.stage]={d,r};save();render();return}
+  if(a==="copy"){const t=summary(),m=$("#msg");
+    const ok=()=>{m.textContent="已複製。"},bad=()=>{m.textContent="無法自動複製，請改用手動選取。";prompt("請複製以下內容：",t)};
+    try{navigator.clipboard.writeText(t).then(ok,bad)}catch(x){bad()}}
+});
+document.addEventListener("submit",e=>{
+  if(e.target.id==="opf"){e.preventDefault();const t=$("#op-text").value.trim();if(!t)return;
+    const d=new Date();S.ops.push({role:S.role,stage:S.stage,stance:$("#op-stance").value,text:t,time:`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`});save();render()}
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.doc){S.docs[t.dataset.doc]=t.checked;save();render();return}
+  if(t.dataset.rule){S.rules[t.dataset.rule]=t.value;save();return}
+  if(t.dataset.w){S.weights[t.dataset.w]=Math.max(0,Math.min(100,+t.value||0));save();render();return}
+  if(t.dataset.score){S.scores[t.dataset.score]=t.value===""?"":Math.max(0,Math.min(100,+t.value));save();return}
+});
+/* 長條圖提示框 */
+const tip=document.createElement("div");tip.className="charttip";tip.hidden=true;document.body.appendChild(tip);
+document.addEventListener("pointermove",e=>{const h=e.target.closest&&e.target.closest(".hit");
+  if(!h){tip.hidden=true;return}tip.textContent=h.dataset.tip;tip.hidden=false;
+  tip.style.left=Math.min(e.clientX+12,innerWidth-tip.offsetWidth-8)+"px";tip.style.top=(e.clientY-30)+"px"});
+document.addEventListener("pointerdown",e=>{const h=e.target.closest&&e.target.closest(".hit");if(!h)tip.hidden=true});
+render();
+</script>
+</body>
+</html>
